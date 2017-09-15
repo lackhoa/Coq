@@ -1,0 +1,115 @@
+DIGEST ff22e308af65ba4aaf6a6026e18241d0
+FMoreSpecif
+R1717:1725 Coq.Init.Logic <> False_rec scheme
+not 1709 <> :specif_scope:'!'
+R1769:1773 Coq.Init.Specif <> exist constr
+not 1757 <> :specif_scope:'['_x_']'
+not 1807 <> :specif_scope:x_'<=='_x_';'_x
+R1996:1999 Coq.Init.Specif <> left constr
+not 1984 <> :specif_scope:'Yes'
+R2042:2046 Coq.Init.Specif <> right constr
+not 2031 <> :specif_scope:'No'
+R2114:2115 MoreSpecif <> :specif_scope:'No' not
+R2105:2107 MoreSpecif <> :specif_scope:'Yes' not
+not 2078 <> :specif_scope:'Reduce'_x
+R2190:2196 MoreSpecif <> :specif_scope:'Reduce'_x not
+R2181:2183 MoreSpecif <> :specif_scope:'Yes' not
+not 2158 <> :specif_scope:x_'||'_x
+sec 2259:2269 <> sumbool_and
+var 2284:2285 sumbool_and P1
+var 2287:2288 sumbool_and Q1
+var 2290:2291 sumbool_and P2
+var 2293:2294 sumbool_and Q2
+var 2316:2317 sumbool_and x1
+R2321:2321 Coq.Init.Specif <> :type_scope:'{'_x_'}'_'+'_'{'_x_'}' not
+R2324:2328 Coq.Init.Specif <> :type_scope:'{'_x_'}'_'+'_'{'_x_'}' not
+R2331:2331 Coq.Init.Specif <> :type_scope:'{'_x_'}'_'+'_'{'_x_'}' not
+R2322:2323 MoreSpecif <> sumbool_and.P1 var
+R2329:2330 MoreSpecif <> sumbool_and.Q1 var
+var 2345:2346 sumbool_and x2
+R2350:2350 Coq.Init.Specif <> :type_scope:'{'_x_'}'_'+'_'{'_x_'}' not
+R2353:2357 Coq.Init.Specif <> :type_scope:'{'_x_'}'_'+'_'{'_x_'}' not
+R2360:2360 Coq.Init.Specif <> :type_scope:'{'_x_'}'_'+'_'{'_x_'}' not
+R2351:2352 MoreSpecif <> sumbool_and.P2 var
+R2358:2359 MoreSpecif <> sumbool_and.Q2 var
+def 2377:2387 <> sumbool_and
+R2391:2391 Coq.Init.Specif <> :type_scope:'{'_x_'}'_'+'_'{'_x_'}' not
+R2400:2404 Coq.Init.Specif <> :type_scope:'{'_x_'}'_'+'_'{'_x_'}' not
+R2413:2413 Coq.Init.Specif <> :type_scope:'{'_x_'}'_'+'_'{'_x_'}' not
+R2394:2397 Coq.Init.Logic <> :type_scope:x_'/\'_x not
+R2392:2393 MoreSpecif <> sumbool_and.P1 var
+R2398:2399 MoreSpecif <> sumbool_and.P2 var
+R2407:2410 Coq.Init.Logic <> :type_scope:x_'\/'_x not
+R2405:2406 MoreSpecif <> sumbool_and.Q1 var
+R2411:2412 MoreSpecif <> sumbool_and.Q2 var
+R2428:2429 MoreSpecif <> sumbool_and.x1 var
+R2444:2447 Coq.Init.Specif <> left constr
+R2470:2471 MoreSpecif <> sumbool_and.x2 var
+R2490:2493 Coq.Init.Specif <> left constr
+R2502:2505 Coq.Init.Specif <> left constr
+R2510:2513 Coq.Init.Logic <> conj constr
+R2536:2540 Coq.Init.Specif <> right constr
+R2549:2553 Coq.Init.Specif <> right constr
+R2558:2566 Coq.Init.Logic <> or_intror constr
+R2595:2599 Coq.Init.Specif <> right constr
+R2608:2612 Coq.Init.Specif <> right constr
+R2617:2625 Coq.Init.Logic <> or_introl constr
+R2647:2657 MoreSpecif sumbool_and <> sec
+R2675:2685 MoreSpecif <> sumbool_and def
+not 2667 <> :specif_scope:x_'&&'_x
+ind 2748:2752 <> maybe
+constr 2791:2797 <> Unknown
+constr 2811:2815 <> Found
+R2769:2769 MoreSpecif <> A var
+R2801:2805 MoreSpecif <> maybe ind
+R2840:2844 MoreSpecif <> maybe ind
+R2835:2835 MoreSpecif <> x var
+R2877:2881 MoreSpecif <> maybe ind
+not 2859 <> :specif_scope:'{{'_x_'|'_x_'}}'
+R2931:2937 MoreSpecif <> Unknown constr
+not 2922 <> :specif_scope:'??'
+R2981:2985 MoreSpecif <> Found constr
+not 2967 <> :specif_scope:'[|'_x_'|]'
+R3084:3090 MoreSpecif <> Unknown constr
+R3096:3094 MoreSpecif <> :specif_scope:'??' not
+R3129:3133 MoreSpecif <> Found constr
+not 3020 <> :specif_scope:x_'<-'_x_';'_x
+R3247:3253 Coq.Init.Specif <> inright constr
+not 3238 <> :specif_scope:'!!'
+R3301:3306 Coq.Init.Specif <> inleft constr
+R3310:3310 MoreSpecif <> :specif_scope:'['_x_']' not
+R3312:3312 MoreSpecif <> :specif_scope:'['_x_']' not
+not 3285 <> :specif_scope:'[||'_x_'||]'
+R3408:3414 Coq.Init.Specif <> inright constr
+R3421:3422 MoreSpecif <> :specif_scope:'!!' not
+R3457:3462 Coq.Init.Specif <> inleft constr
+R3465:3469 Coq.Init.Specif <> exist constr
+not 3341 <> :specif_scope:x_'<--'_x_';'_x
+R3612:3610 MoreSpecif <> :specif_scope:'??' not
+not 3577 <> :specif_scope:x_';;'_x
+R3713:3714 MoreSpecif <> :specif_scope:'!!' not
+not 3678 <> :specif_scope:x_';;;'_x
+sec 3780:3786 <> partial
+var 3800:3800 partial P
+ind 3823:3829 <> partial
+constr 3844:3849 <> Proved
+constr 3870:3878 <> Uncertain
+R3858:3864 MoreSpecif <> partial ind
+R3853:3853 MoreSpecif <> partial.P var
+R3882:3888 MoreSpecif <> partial ind
+R3895:3901 MoreSpecif partial <> sec
+R3926:3932 MoreSpecif <> partial ind
+not 3914 <> :type_scope:'['_x_']'
+R3973:3978 MoreSpecif <> Proved constr
+not 3961 <> :partial_scope:'Yes'
+R4020:4028 MoreSpecif <> Uncertain constr
+not 4009 <> :partial_scope:'No'
+R4171:4172 MoreSpecif <> :partial_scope:'No' not
+R4162:4164 MoreSpecif <> :partial_scope:'Yes' not
+not 4135 <> :partial_scope:'Reduce'_x
+R4233:4239 MoreSpecif <> :partial_scope:'Reduce'_x not
+R4224:4226 MoreSpecif <> :partial_scope:'Yes' not
+not 4201 <> :partial_scope:x_'||'_x
+R4306:4307 MoreSpecif <> :partial_scope:'No' not
+R4292:4298 MoreSpecif <> :partial_scope:'Reduce'_x not
+not 4269 <> :partial_scope:x_'&&'_x

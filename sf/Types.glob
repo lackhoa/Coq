@@ -1,0 +1,484 @@
+DIGEST 4ddc1f38268bbd8ceefa9caceb3b480c
+FTypes
+R594:608 Coq.Arith.Arith <> <> lib
+R626:629 Maps <> <> lib
+R647:649 Imp <> <> lib
+R667:675 Smallstep <> <> lib
+R697:701 Types <> multi ind
+ind 1658:1659 <> tm
+constr 1675:1679 <> ttrue
+constr 1690:1695 <> tfalse
+constr 1706:1708 <> tif
+constr 1737:1741 <> tzero
+constr 1752:1756 <> tsucc
+constr 1773:1777 <> tpred
+constr 1794:1800 <> tiszero
+R1683:1684 Types <> tm ind
+R1699:1700 Types <> tm ind
+R1730:1731 Types <> tm ind
+R1724:1725 Types <> tm ind
+R1718:1719 Types <> tm ind
+R1712:1713 Types <> tm ind
+R1745:1746 Types <> tm ind
+R1766:1767 Types <> tm ind
+R1760:1761 Types <> tm ind
+R1787:1788 Types <> tm ind
+R1781:1782 Types <> tm ind
+R1810:1811 Types <> tm ind
+R1804:1805 Types <> tm ind
+ind 1885:1890 <> bvalue
+constr 1912:1918 <> bv_true
+constr 1939:1946 <> bv_false
+R1894:1895 Types <> tm ind
+R1922:1927 Types <> bvalue ind
+R1929:1933 Types <> ttrue constr
+R1950:1955 Types <> bvalue ind
+R1957:1962 Types <> tfalse constr
+ind 1976:1981 <> nvalue
+constr 2003:2009 <> nv_zero
+constr 2030:2036 <> nv_succ
+R1985:1986 Types <> tm ind
+R2013:2018 Types <> nvalue ind
+R2020:2024 Types <> tzero constr
+R2062:2067 Types <> nvalue ind
+R2070:2074 Types <> tsucc constr
+R2076:2076 Types <> t var
+R2050:2055 Types <> nvalue ind
+R2057:2057 Types <> t var
+def 2092:2096 <> value
+R2101:2102 Types <> tm ind
+R2116:2119 Coq.Init.Logic <> :type_scope:x_'\/'_x not
+R2108:2113 Types <> bvalue ind
+R2115:2115 Types <> t var
+R2120:2125 Types <> nvalue ind
+R2127:2127 Types <> t var
+R2149:2154 Types <> bvalue ind
+R2156:2161 Types <> nvalue ind
+R2176:2180 Types <> value def
+R2195:2200 Maps <> update def
+ind 4013:4016 <> step
+constr 4044:4052 <> ST_IfTrue
+constr 4105:4114 <> ST_IfFalse
+constr 4168:4172 <> ST_If
+constr 4262:4268 <> ST_Succ
+constr 4344:4354 <> ST_PredZero
+constr 4392:4402 <> ST_PredSucc
+constr 4472:4478 <> ST_Pred
+constr 4554:4566 <> ST_IszeroZero
+constr 4606:4618 <> ST_IszeroSucc
+constr 4695:4703 <> ST_Iszero
+R4026:4027 Types <> tm ind
+R4020:4021 Types <> tm ind
+R4804:4807 Types <> step ind
+R4076:4076 Types <> ::x_'==>'_x not
+R4092:4097 Types <> ::x_'==>'_x not
+R4077:4079 Types <> tif constr
+R4090:4091 Types <> t2 var
+R4087:4088 Types <> t1 var
+R4081:4085 Types <> ttrue constr
+R4098:4099 Types <> t1 var
+R4138:4138 Types <> ::x_'==>'_x not
+R4155:4160 Types <> ::x_'==>'_x not
+R4139:4141 Types <> tif constr
+R4153:4154 Types <> t2 var
+R4150:4151 Types <> t1 var
+R4143:4148 Types <> tfalse constr
+R4161:4162 Types <> t2 var
+R4223:4223 Types <> ::x_'==>'_x not
+R4236:4242 Types <> ::x_'==>'_x not
+R4256:4256 Types <> ::x_'==>'_x not
+R4224:4226 Types <> tif constr
+R4234:4235 Types <> t3 var
+R4231:4232 Types <> t2 var
+R4228:4229 Types <> t1 var
+R4243:4245 Types <> tif constr
+R4254:4255 Types <> t3 var
+R4251:4252 Types <> t2 var
+R4247:4249 Types <> t1' var
+R4205:4209 Types <> ::x_'==>'_x not
+R4203:4204 Types <> t1 var
+R4210:4212 Types <> t1' var
+R4313:4313 Types <> ::x_'==>'_x not
+R4322:4328 Types <> ::x_'==>'_x not
+R4338:4338 Types <> ::x_'==>'_x not
+R4314:4318 Types <> tsucc constr
+R4320:4321 Types <> t1 var
+R4329:4333 Types <> tsucc constr
+R4335:4337 Types <> t1' var
+R4295:4299 Types <> ::x_'==>'_x not
+R4293:4294 Types <> t1 var
+R4300:4302 Types <> t1' var
+R4364:4364 Types <> ::x_'==>'_x not
+R4376:4381 Types <> ::x_'==>'_x not
+R4365:4369 Types <> tpred constr
+R4371:4375 Types <> tzero constr
+R4382:4386 Types <> tzero constr
+R4442:4442 Types <> ::x_'==>'_x not
+R4459:4464 Types <> ::x_'==>'_x not
+R4443:4447 Types <> tpred constr
+R4450:4454 Types <> tsucc constr
+R4456:4457 Types <> t1 var
+R4465:4466 Types <> t1 var
+R4423:4428 Types <> nvalue ind
+R4430:4431 Types <> t1 var
+R4523:4523 Types <> ::x_'==>'_x not
+R4532:4538 Types <> ::x_'==>'_x not
+R4548:4548 Types <> ::x_'==>'_x not
+R4524:4528 Types <> tpred constr
+R4530:4531 Types <> t1 var
+R4539:4543 Types <> tpred constr
+R4545:4547 Types <> t1' var
+R4505:4509 Types <> ::x_'==>'_x not
+R4503:4504 Types <> t1 var
+R4510:4512 Types <> t1' var
+R4576:4576 Types <> ::x_'==>'_x not
+R4590:4595 Types <> ::x_'==>'_x not
+R4577:4583 Types <> tiszero constr
+R4585:4589 Types <> tzero constr
+R4596:4600 Types <> ttrue constr
+R4659:4659 Types <> ::x_'==>'_x not
+R4678:4683 Types <> ::x_'==>'_x not
+R4660:4666 Types <> tiszero constr
+R4669:4673 Types <> tsucc constr
+R4675:4676 Types <> t1 var
+R4684:4689 Types <> tfalse constr
+R4640:4645 Types <> nvalue ind
+R4647:4648 Types <> t1 var
+R4748:4748 Types <> ::x_'==>'_x not
+R4759:4765 Types <> ::x_'==>'_x not
+R4777:4777 Types <> ::x_'==>'_x not
+R4749:4755 Types <> tiszero constr
+R4757:4758 Types <> t1 var
+R4766:4772 Types <> tiszero constr
+R4774:4776 Types <> t1' var
+R4730:4734 Types <> ::x_'==>'_x not
+R4728:4729 Types <> t1 var
+R4735:4737 Types <> t1' var
+R4804:4807 Types <> step ind
+not 4786 <> ::x_'==>'_x
+R4836:4839 Types <> step ind
+syndef 5803:5818 <> step_normal_form
+R5824:5834 Smallstep <> normal_form def
+R5836:5839 Types <> step ind
+def 5855:5859 <> stuck
+R5864:5865 Types <> tm ind
+R5898:5901 Coq.Init.Logic <> :type_scope:x_'/\'_x not
+R5880:5895 Types <> step_normal_form syndef
+R5897:5897 Types <> t var
+R5902:5903 Coq.Init.Logic <> :type_scope:'~'_x not
+R5904:5908 Types <> value def
+R5910:5910 Types <> t var
+R5926:5930 Types <> stuck def
+def 5994:6011 <> some_term_is_stuck
+R6017:6023 Coq.Init.Logic <> :type_scope:'exists'_x_'..'_x_','_x not
+R6025:6026 Coq.Init.Logic <> :type_scope:'exists'_x_'..'_x_','_x not
+R6027:6031 Types <> stuck def
+R6033:6033 Types <> t var
+prf 6411:6421 <> value_is_nf
+R6448:6463 Types <> step_normal_form syndef
+R6465:6465 Types <> t var
+R6437:6441 Types <> value def
+R6443:6443 Types <> t var
+prf 7133:7150 <> step_deterministic
+R7155:7167 Smallstep <> deterministic def
+R7169:7172 Types <> step ind
+ind 7714:7715 <> ty
+constr 7731:7735 <> TBool
+constr 7746:7749 <> TNat
+R7739:7740 Types <> ty ind
+R7753:7754 Types <> ty ind
+ind 9259:9266 <> has_type
+constr 9294:9299 <> T_True
+constr 9333:9339 <> T_False
+constr 9374:9377 <> T_If
+constr 9503:9508 <> T_Zero
+constr 9541:9546 <> T_Succ
+constr 9618:9623 <> T_Pred
+constr 9695:9702 <> T_Iszero
+R9276:9277 Types <> ty ind
+R9270:9271 Types <> tm ind
+R9801:9808 Types <> has_type ind
+R9310:9312 Types <> ::'|-'_x_'\in'_x not
+R9318:9322 Types <> ::'|-'_x_'\in'_x not
+R9313:9317 Types <> ttrue constr
+R9323:9327 Types <> TBool constr
+R9350:9352 Types <> ::'|-'_x_'\in'_x not
+R9359:9363 Types <> ::'|-'_x_'\in'_x not
+R9353:9358 Types <> tfalse constr
+R9364:9368 Types <> TBool constr
+R9477:9479 Types <> ::'|-'_x_'\in'_x not
+R9492:9496 Types <> ::'|-'_x_'\in'_x not
+R9480:9482 Types <> tif constr
+R9490:9491 Types <> t3 var
+R9487:9488 Types <> t2 var
+R9484:9485 Types <> t1 var
+R9497:9497 Types <> T var
+R9455:9457 Types <> ::'|-'_x_'\in'_x not
+R9460:9464 Types <> ::'|-'_x_'\in'_x not
+R9458:9459 Types <> t3 var
+R9465:9465 Types <> T var
+R9433:9435 Types <> ::'|-'_x_'\in'_x not
+R9438:9442 Types <> ::'|-'_x_'\in'_x not
+R9436:9437 Types <> t2 var
+R9443:9443 Types <> T var
+R9407:9409 Types <> ::'|-'_x_'\in'_x not
+R9412:9416 Types <> ::'|-'_x_'\in'_x not
+R9410:9411 Types <> t1 var
+R9417:9421 Types <> TBool constr
+R9519:9521 Types <> ::'|-'_x_'\in'_x not
+R9527:9531 Types <> ::'|-'_x_'\in'_x not
+R9522:9526 Types <> tzero constr
+R9532:9535 Types <> TNat constr
+R9593:9595 Types <> ::'|-'_x_'\in'_x not
+R9604:9608 Types <> ::'|-'_x_'\in'_x not
+R9596:9600 Types <> tsucc constr
+R9602:9603 Types <> t1 var
+R9609:9612 Types <> TNat constr
+R9568:9570 Types <> ::'|-'_x_'\in'_x not
+R9573:9577 Types <> ::'|-'_x_'\in'_x not
+R9571:9572 Types <> t1 var
+R9578:9581 Types <> TNat constr
+R9670:9672 Types <> ::'|-'_x_'\in'_x not
+R9681:9685 Types <> ::'|-'_x_'\in'_x not
+R9673:9677 Types <> tpred constr
+R9679:9680 Types <> t1 var
+R9686:9689 Types <> TNat constr
+R9645:9647 Types <> ::'|-'_x_'\in'_x not
+R9650:9654 Types <> ::'|-'_x_'\in'_x not
+R9648:9649 Types <> t1 var
+R9655:9658 Types <> TNat constr
+R9749:9751 Types <> ::'|-'_x_'\in'_x not
+R9762:9766 Types <> ::'|-'_x_'\in'_x not
+R9752:9758 Types <> tiszero constr
+R9760:9761 Types <> t1 var
+R9767:9771 Types <> TBool constr
+R9724:9726 Types <> ::'|-'_x_'\in'_x not
+R9729:9733 Types <> ::'|-'_x_'\in'_x not
+R9727:9728 Types <> t1 var
+R9734:9737 Types <> TNat constr
+R9801:9808 Types <> has_type ind
+not 9780 <> ::'|-'_x_'\in'_x
+R9835:9842 Types <> has_type ind
+def 9854:9863 <> has_type_1
+R9869:9871 Types <> ::'|-'_x_'\in'_x not
+R9902:9906 Types <> ::'|-'_x_'\in'_x not
+R9872:9874 Types <> tif constr
+R9890:9894 Types <> tsucc constr
+R9896:9900 Types <> tzero constr
+R9883:9887 Types <> tzero constr
+R9876:9881 Types <> tfalse constr
+R9907:9910 Types <> TNat constr
+R9928:9931 Types <> T_If constr
+R9928:9931 Types <> T_If constr
+R9946:9952 Types <> T_False constr
+R9946:9952 Types <> T_False constr
+R9967:9972 Types <> T_Zero constr
+R9967:9972 Types <> T_Zero constr
+R9987:9992 Types <> T_Succ constr
+R9987:9992 Types <> T_Succ constr
+R10010:10015 Types <> T_Zero constr
+R10010:10015 Types <> T_Zero constr
+def 10447:10458 <> has_type_not
+R10464:10466 Coq.Init.Logic <> :type_scope:'~'_x not
+R10502:10502 Coq.Init.Logic <> :type_scope:'~'_x not
+R10467:10469 Types <> ::'|-'_x_'\in'_x not
+R10492:10496 Types <> ::'|-'_x_'\in'_x not
+R10470:10472 Types <> tif constr
+R10487:10491 Types <> ttrue constr
+R10481:10485 Types <> tzero constr
+R10474:10479 Types <> tfalse constr
+R10497:10501 Types <> TBool constr
+def 10636:10664 <> succ_hastype_nat__hastype_nat
+R10705:10707 Types <> ::'|-'_x_'\in'_x not
+R10709:10713 Types <> ::'|-'_x_'\in'_x not
+R10708:10708 Types <> t var
+R10714:10717 Types <> TNat constr
+R10680:10682 Types <> ::'|-'_x_'\in'_x not
+R10690:10694 Types <> ::'|-'_x_'\in'_x not
+R10683:10687 Types <> tsucc constr
+R10689:10689 Types <> t var
+R10695:10698 Types <> TNat constr
+prf 11032:11045 <> bool_canonical
+R11090:11095 Types <> bvalue ind
+R11097:11097 Types <> t var
+R11079:11083 Types <> value def
+R11085:11085 Types <> t var
+R11061:11063 Types <> ::'|-'_x_'\in'_x not
+R11065:11069 Types <> ::'|-'_x_'\in'_x not
+R11064:11064 Types <> t var
+R11070:11074 Types <> TBool constr
+prf 11194:11206 <> nat_canonical
+R11250:11255 Types <> nvalue ind
+R11257:11257 Types <> t var
+R11239:11243 Types <> value def
+R11245:11245 Types <> t var
+R11222:11224 Types <> ::'|-'_x_'\in'_x not
+R11226:11230 Types <> ::'|-'_x_'\in'_x not
+R11225:11225 Types <> t var
+R11231:11234 Types <> TNat constr
+prf 11758:11765 <> progress
+R11806:11809 Coq.Init.Logic <> :type_scope:x_'\/'_x not
+R11799:11803 Types <> value def
+R11805:11805 Types <> t var
+R11810:11816 Coq.Init.Logic <> :type_scope:'exists'_x_'..'_x_','_x not
+R11819:11820 Coq.Init.Logic <> :type_scope:'exists'_x_'..'_x_','_x not
+R11822:11826 Types <> ::x_'==>'_x not
+R11821:11821 Types <> t var
+R11827:11828 Types <> t' var
+R11783:11785 Types <> ::'|-'_x_'\in'_x not
+R11787:11791 Types <> ::'|-'_x_'\in'_x not
+R11786:11786 Types <> t var
+R11792:11792 Types <> T var
+R12313:12326 Types <> bool_canonical thm
+R12313:12326 Types <> bool_canonical thm
+R12489:12491 Types <> tif constr
+R12489:12491 Types <> tif constr
+prf 14153:14164 <> preservation
+R14215:14217 Types <> ::'|-'_x_'\in'_x not
+R14220:14224 Types <> ::'|-'_x_'\in'_x not
+R14218:14219 Types <> t' var
+R14225:14225 Types <> T var
+R14202:14206 Types <> ::x_'==>'_x not
+R14201:14201 Types <> t var
+R14207:14208 Types <> t' var
+R14185:14187 Types <> ::'|-'_x_'\in'_x not
+R14189:14193 Types <> ::'|-'_x_'\in'_x not
+R14188:14188 Types <> t var
+R14194:14194 Types <> T var
+R14831:14834 Types <> T_If constr
+R14831:14834 Types <> T_If constr
+prf 16578:16590 <> preservation'
+R16641:16643 Types <> ::'|-'_x_'\in'_x not
+R16646:16650 Types <> ::'|-'_x_'\in'_x not
+R16644:16645 Types <> t' var
+R16651:16651 Types <> T var
+R16628:16632 Types <> ::x_'==>'_x not
+R16627:16627 Types <> t var
+R16633:16634 Types <> t' var
+R16611:16613 Types <> ::'|-'_x_'\in'_x not
+R16615:16619 Types <> ::'|-'_x_'\in'_x not
+R16614:16614 Types <> t var
+R16620:16620 Types <> T var
+def 17248:17256 <> multistep
+R17262:17266 Smallstep <> multi ind
+R17268:17271 Types <> step ind
+R17303:17311 Types <> multistep def
+not 17284 <> ::x_'==>*'_x
+prf 17346:17354 <> soundness
+R17406:17407 Coq.Init.Logic <> :type_scope:'~'_x not
+R17416:17416 Coq.Init.Logic <> :type_scope:'~'_x not
+R17408:17412 Types <> stuck def
+R17414:17415 Types <> t' var
+R17392:17397 Types <> ::x_'==>*'_x not
+R17391:17391 Types <> t var
+R17398:17399 Types <> t' var
+R17375:17377 Types <> ::'|-'_x_'\in'_x not
+R17379:17383 Types <> ::'|-'_x_'\in'_x not
+R17378:17378 Types <> t var
+R17384:17384 Types <> T var
+R17487:17494 Types <> progress prfax
+R17487:17494 Types <> progress prfax
+R17532:17543 Types <> preservation prfax
+R17532:17543 Types <> preservation prfax
+R17567:17571 Types <> stuck def
+mod 18149:18167 <> NormalizePlayground
+def 18197:18209 NormalizePlayground step_example1
+R18215:18215 Smallstep <> ::x_'==>*'_x not
+R18239:18249 Smallstep <> ::x_'==>*'_x not
+R18254:18254 Smallstep <> ::x_'==>*'_x not
+R18216:18216 Smallstep <> P constr
+R18225:18225 Smallstep <> P constr
+R18234:18234 Smallstep <> C constr
+R18228:18228 Smallstep <> C constr
+R18219:18219 Smallstep <> C constr
+R18250:18250 Smallstep <> C constr
+R18289:18289 Smallstep <> P constr
+R18298:18298 Smallstep <> C constr
+R18292:18292 Smallstep <> C constr
+R18272:18281 Smallstep <> multi_step constr
+R18289:18289 Smallstep <> P constr
+R18298:18298 Smallstep <> C constr
+R18292:18292 Smallstep <> C constr
+R18272:18281 Smallstep <> multi_step constr
+R18315:18322 Smallstep <> ST_Plus2 constr
+R18315:18322 Smallstep <> ST_Plus2 constr
+R18337:18343 Smallstep <> v_const constr
+R18337:18343 Smallstep <> v_const constr
+R18358:18374 Smallstep <> ST_PlusConstConst constr
+R18358:18374 Smallstep <> ST_PlusConstConst constr
+R18402:18402 Smallstep <> C constr
+R18385:18394 Smallstep <> multi_step constr
+R18402:18402 Smallstep <> C constr
+R18385:18394 Smallstep <> multi_step constr
+R18419:18435 Smallstep <> ST_PlusConstConst constr
+R18419:18435 Smallstep <> ST_PlusConstConst constr
+R18446:18455 Smallstep <> multi_refl constr
+R18446:18455 Smallstep <> multi_refl constr
+R18708:18711 Types <> step ind
+R18713:18717 Types <> value ind
+def 18728:18741 NormalizePlayground step_example1'
+R18747:18747 Smallstep <> ::x_'==>*'_x not
+R18771:18780 Smallstep <> ::x_'==>*'_x not
+R18785:18785 Smallstep <> ::x_'==>*'_x not
+R18748:18748 Smallstep <> P constr
+R18757:18757 Smallstep <> P constr
+R18766:18766 Smallstep <> C constr
+R18760:18760 Smallstep <> C constr
+R18751:18751 Smallstep <> C constr
+R18781:18781 Smallstep <> C constr
+R18804:18813 Smallstep <> multi_step constr
+R18804:18813 Smallstep <> multi_step constr
+R18838:18847 Smallstep <> multi_step constr
+R18838:18847 Smallstep <> multi_step constr
+R18871:18880 Smallstep <> multi_refl constr
+R18871:18880 Smallstep <> multi_refl constr
+R19227:19236 Smallstep <> multi_step constr
+R19305:19314 Smallstep <> multi_refl constr
+def 19326:19340 NormalizePlayground step_example1''
+R19346:19346 Smallstep <> ::x_'==>*'_x not
+R19370:19380 Smallstep <> ::x_'==>*'_x not
+R19385:19385 Smallstep <> ::x_'==>*'_x not
+R19347:19347 Smallstep <> P constr
+R19356:19356 Smallstep <> P constr
+R19365:19365 Smallstep <> C constr
+R19359:19359 Smallstep <> C constr
+R19350:19350 Smallstep <> C constr
+R19381:19381 Smallstep <> C constr
+def 19823:19838 NormalizePlayground step_example1'''
+R19842:19848 Coq.Init.Logic <> :type_scope:'exists'_x_'..'_x_','_x not
+R19851:19854 Coq.Init.Logic <> :type_scope:'exists'_x_'..'_x_','_x not
+R19855:19855 Smallstep <> ::x_'==>*'_x not
+R19879:19887 Smallstep <> ::x_'==>*'_x not
+R19856:19856 Smallstep <> P constr
+R19865:19865 Smallstep <> P constr
+R19874:19874 Smallstep <> C constr
+R19868:19868 Smallstep <> C constr
+R19859:19859 Smallstep <> C constr
+R19888:19889 Types <> e' var
+R19908:19915 Coq.Init.Logic <> ex_intro constr
+R19908:19915 Coq.Init.Logic <> ex_intro constr
+prf 20168:20179 NormalizePlayground normalize_ex
+R20183:20189 Coq.Init.Logic <> :type_scope:'exists'_x_'..'_x_','_x not
+R20192:20195 Coq.Init.Logic <> :type_scope:'exists'_x_'..'_x_','_x not
+R20196:20196 Smallstep <> ::x_'==>*'_x not
+R20220:20229 Smallstep <> ::x_'==>*'_x not
+R20197:20197 Smallstep <> P constr
+R20206:20206 Smallstep <> P constr
+R20215:20215 Smallstep <> C constr
+R20209:20209 Smallstep <> C constr
+R20200:20200 Smallstep <> C constr
+R20230:20231 Types <> e' var
+prf 20415:20427 NormalizePlayground normalize_ex'
+R20431:20437 Coq.Init.Logic <> :type_scope:'exists'_x_'..'_x_','_x not
+R20440:20443 Coq.Init.Logic <> :type_scope:'exists'_x_'..'_x_','_x not
+R20444:20444 Smallstep <> ::x_'==>*'_x not
+R20468:20477 Smallstep <> ::x_'==>*'_x not
+R20445:20445 Smallstep <> P constr
+R20454:20454 Smallstep <> P constr
+R20463:20463 Smallstep <> C constr
+R20457:20457 Smallstep <> C constr
+R20448:20448 Smallstep <> C constr
+R20478:20479 Types <> e' var
+R20535:20553 Types <> <> mod
+R20688:20697 Smallstep <> multi_step constr
+R20766:20775 Smallstep <> multi_refl constr

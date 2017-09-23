@@ -1,6 +1,5 @@
-Add LoadPath "/home/khoa/Coq/sf".
-Require Export Poly.
-Require Export IndProp.
+Require Import List.
+Import List.ListNotations.
 
 (*Somehow I have to rewrite 'In'*)
 Fixpoint In {T : Type} (t : T) (l : list T) : Prop := match l with
@@ -38,9 +37,10 @@ Proof.
   + apply H. auto.
 Qed.
 
+Module ListNotations.
 (*Ring network (Not really, but I guess it doesn't matter*)
 Inductive ring_topo : network -> Prop :=
-  | ring_base : forall n1 n2, Pconnect n1 n2 -> ring_topo [n1; n2]
+  | ring_base : forall n1 n2, (Pconnect n1 n2) -> ring_topo [n1; n2]
   | ring_next : forall n1 n2 (l : network), ring_topo (n2 :: l) -> 
     (Pconnect n1 n2) -> ring_topo (n1 :: n2 :: l).
 

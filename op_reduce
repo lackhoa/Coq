@@ -1,0 +1,110 @@
+Require Import List.
+Require Import Coq.Sorting.Permutation.
+Require Import Arith.
+Require Import Omega.
+Import ListNotations.
+
+Definition op_commut {A: Type} (f: A -> A -> A) :=
+  forall a b, f a b = f b a.
+
+Definition op_assoc {A: Type} (f: A -> A -> A) :=
+  forall a b c, f (f a b) c  = f a (f b c).
+
+(*Testing for fun*)
+Theorem plus_commut : op_commut plus.
+Proof. unfold op_commut. intros. omega. Qed.
+
+Theorem plus_assoc : op_assoc plus.
+Proof. unfold op_assoc. intros. omega. Qed.
+
+Corollary perm_fold_left_length :
+  forall (n: nat) {A: Type} (f: A -> A -> A) (l1 l2: list A) (a0: A),
+    length l1 = n ->
+    op_commut f ->
+    op_assoc f ->
+    Permutation l1 l2 -> fold_left f l1 a0 = fold_left f l2 a0.
+Proof. unfold op_commut. induction n; intros. 
+
+- apply length_zero_iff_nil in H. subst.
+apply Permutation_nil in H2. subst. reflexivity.
+
+- induction H2.
+  + reflexivity.
+  + simpl; rewrite H0. eapply IHn; auto.
+  + simpl. unfold op_assoc in H1.
+  assert ((f (f a0 y) x) = (f (f a0 x) y)).
+  { rewrite H1. rewrite H1. rewrite (H0 y x).
+  reflexivity. }
+  rewrite H2. reflexivity.
+  + transitivity (fold_left f l' a0); auto.
+    * apply IHPermutation2. apply Permutation_length in H2_.
+    rewrite <- H2_. assumption.
+Qed. (*YES!*)
+
+Theorem  perm_fold_left :
+  forall {A: Type} (f: A -> A -> A) (l1 l2: list A) (a0: A),
+    op_commut f ->
+    op_assoc f ->
+    Permutation l1 l2 -> fold_left f l1 a0 = fold_left f l2 a0.
+Proof. intros. apply perm_fold_left_length with (length l1); eauto. Qed.
+(*That was a piece of cake!*)
+
+  Tactic Notation "solve_by_inversion_aux" tactic(t) :=
+    match goal with
+    | H : _ |- _ => solve [ inversion H; subst; t ]
+    end
+    || fail "because the goal is not solvable by inversion.".
+  
+  Tactic Notation "solve" "by" "inversion" "1" :=
+    solve_by_inversion_aux idtac.
+  Tactic Notation "solve" "by" "inversion" "2" :=
+    solve_by_inversion_aux (solve by inversion 1).
+  Tactic Notation "solve" "by" "inversion" "3" :=
+    solve_by_inversion_aux (solve by inversion 2).
+  Tactic Notation "solve" "by" "inversion" :=
+    solve by inversion 1.
+
+
+(*Now look at what it can do!*)
+Example plus_reduce : forall a b c d e,
+  a + b + c + d + e = e + (d + a + c) + b.
+Proof. intros. repeat rewrite <- plus_assoc. (*This will remove all parentheses*)
+replace (a + b + c + d + e) with (fold_left plus [a; b; c; d; e] 0);
+replace (e + d + a + c + b) with (fold_left plus [e; d; a; c; b] 0);
+auto using plus_n_O. (*Eliminating the zero at the end*)
+
+apply perm_fold_left. - apply plus_commut. - apply plus_assoc.
+
+- apply Permutation_nth with 5. simpl. split; auto.
+(*Now we deal with this shithole*)
+exists (fun n => match n with
+  | 0 => 4
+  | 1 => 3
+  | 2 => 0
+  | 3 => 2
+  | 4 => 1
+  | 5 => 5
+  | S (S (S (S (S (S _))))) => 6 end).
+split.
+{ unfold FinFun.bFun. repeat (induction x; try omega). }
+
+split.
+{ intros. unfold FinFun.bInjective. intros.
+
+do 5 (try destruct x; try destruct y; auto; 
+try solve_by_inversion_aux ((solve by inversion 1)));
+(try destruct x; try destruct y; try omega).
+(*Don't ask me why the above code works*)
+}
+
+intros. do 5 (destruct x; auto).
+omega.
+Qed.
+(*What is pain? What is desperation? What is despair?*)
+
+
+
+
+
+
+

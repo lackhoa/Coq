@@ -3,11 +3,11 @@
 (** Before getting started, we need to import all of our
     definitions from the previous chapter: *)
 
-Require Export Basics.
-Add LoadPath "/home/khoa/Coq/cpdtlib".
+Require Import Arith.
+(*Add LoadPath "/home/khoa/Coq/cpdtlib".
 (*Must remove the the cpdt prefix because coq does't like that
 for some reason*)
-Require Export CpdtTactics.
+Require Export CpdtTactics. *)
 
 (** For the [Require Export] to work, you first need to use
     [coqc] to compile [Basics.v] into [Basics.vo].  This is like
@@ -113,7 +113,7 @@ Create HintDb khoa. Hint Transparent nat_ind : khoa.
 
 Theorem minus_diag : forall n,
   minus n n = 0.
-Proof. crush. Qed.
+Proof. Admitted.
 
 (** (The use of the [intros] tactic in these proofs is actually
     redundant.  When applied to a goal that contains quantified
@@ -170,10 +170,10 @@ Proof.  induction n; intros.
     alternative characterization of [evenb (S n)] that works better
     with induction: *)
 
-Theorem evenb_S : forall n : nat,
+(*Theorem evenb_S : forall n : nat,
   evenb (S n) = negb (evenb n).
 Proof.
-  (* FILL IN HERE *) Admitted.
+  (* FILL IN HERE *) Admitted. *)
 (** [] *)
 
 (** **** Exercise: 1 starM (destruct_induction)  *)
@@ -407,7 +407,7 @@ Proof.
 
 Theorem plus_swap : forall n m p : nat,
   n + (m + p) = m + (n + p).
-Proof. crush. Qed.
+Proof. Admitted.
 
 (** Now prove commutativity of multiplication.  (You will probably
     need to define and prove a separate subsidiary theorem to be used
@@ -416,7 +416,7 @@ Proof. crush. Qed.
 
 Theorem mult_comm : forall m n : nat,
   m * n = n * m.
-Proof. crush. Qed.
+Proof. Admitted.
 
 
 (** [] *)
@@ -430,28 +430,28 @@ Proof. crush. Qed.
     to turn in your piece of paper; this is just to encourage you to
     reflect before you hack!) *)
 
-Theorem leb_refl : forall n:nat,
+(*Theorem leb_refl : forall n:nat,
   true = leb n n.
-Proof. induction n; crush. Qed.  
+Proof. Admitted.*)
 
 Theorem zero_nbeq_S : forall n:nat,
   beq_nat 0 (S n) = false.
-Proof. crush. Qed.
+Proof. Admitted.
 
 Theorem andb_false_r : forall b : bool,
   andb b false = false.
-Proof. destruct b; crush. Qed.
+Proof. Admitted.
 
 Theorem plus_ble_compat_l : forall n m p : nat,
   leb n m = true -> leb (p + n) (p + m) = true.
-Proof. induction p; crush. Qed.
+Proof. Admitted.
 
 Theorem S_nbeq_0 : forall n:nat,
   beq_nat (S n) 0 = false.
-Proof. induction n; crush. Qed.
 
+Proof. Admitted.
 Theorem mult_1_l : forall n:nat, 1 * n = n.
-Proof. induction n; crush. Qed.
+Proof. Admitted.
 
 Theorem all3_spec : forall b c : bool,
     orb
@@ -459,15 +459,15 @@ Theorem all3_spec : forall b c : bool,
       (orb (negb b)
                (negb c))
   = true.
-Proof. destruct b; destruct c; crush. Qed. 
+Proof. Admitted.
 
 Theorem mult_plus_distr_r : forall n m p : nat,
   (n + m) * p = (n * p) + (m * p).
-Proof. induction n; crush. Qed.
+Proof. Admitted.
 
 Theorem mult_assoc : forall n m p : nat,
   n * (m * p) = (n * m) * p.
-Proof. induction n; crush. Qed.
+Proof. Admitted.
 (** [] *)
 
 (** **** Exercise: 2 stars, optional (beq_nat_refl)  *)
@@ -479,7 +479,7 @@ Proof. induction n; crush. Qed.
 
 Theorem beq_nat_refl : forall n : nat,
   true = beq_nat n n.
-Proof. induction n; crush. Qed.
+Proof. Admitted.
 (** [] *)
 
 (** **** Exercise: 2 stars, optional (plus_swap')  *)
@@ -525,7 +525,7 @@ Proof.
 
 Theorem bin_to_nat_pres_incr : forall (b: bin),
   bin_to_nat (incr b) = S (bin_to_nat b).
-Proof. induction b; crush. Qed.
+Proof. Admitted.
   
 (** [] *)
 
@@ -563,9 +563,7 @@ end.
 
 Theorem nat_bin_nat : forall (n : nat),
   bin_to_nat (nat_to_bin n) = n.
-Proof. induction n; crush.
-rewrite bin_to_nat_pres_incr. (*CRUSH FAILED!*)
-crush. Qed.
+Proof. Admitted.
 
 Fixpoint normalize (b: bin) : bin := match b with
   | z => z
@@ -580,36 +578,7 @@ end.
 
 Theorem bin_nat_bin_z : forall b: bin,
   nat_to_bin (bin_to_nat b) = z <-> normalize b = z.
-Proof. split.
-- induction b; crush.
-destruct (bin_to_nat b * 2) eqn:Hb.
-assert (bin_to_nat b = 0). crush.
-assert (normalize b = z). crush.
-crush.
-assert (normalize b = z). crush.
-destruct (nat_to_bin n); crush.
-rewrite H0. reflexivity.
-destruct (nat_to_bin (bin_to_nat b * 2)); crush.
-- induction b; crush.
-destruct (normalize b); crush.
-destruct (bin_to_nat b); crush.
-destruct (nat_to_bin n); crush.
-Qed.
-
-Theorem norm_z : forall b: bin,
-  normalize b = z <->
-  bin_to_nat b = 0.
-Proof. split. 
-- intros. induction b; crush.
-destruct (normalize b); crush.
-- intros. induction b; crush. Qed.
-
-Theorem bin_nat_bin : forall (b: bin),
-  nat_to_bin (bin_to_nat b) = normalize b.
-Proof. induction b.
-- crush.
-- simpl.
-
+Proof. Admitted. Admitted.
 
 
 (** [] *)

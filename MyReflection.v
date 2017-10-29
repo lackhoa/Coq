@@ -2,24 +2,24 @@ Require Import Arith.
 Require Import Nat.
 Require Import List.
 
-Inductive reflect (P: Prop) : bool -> Prop :=
-  | ReflectT: P -> reflect P true
-  | ReflectF: ~P -> reflect P false.
+Inductive reflect (P: Prop) (b: bool) :  Prop :=
+  | ReflectT: (P /\ (b = true))-> reflect P b
+  | ReflectF: (~P /\ (b = false)) -> reflect P b.
 
 Theorem reflect_iff: forall P b,
   reflect P b <-> (P <-> b = true).
 Proof. split.
-- intros. inversion H.
+- intros. inversion H; destruct H0.
   + split; auto.
-  + split; auto. intros. inversion H2.
-- intros. destruct b.
-  + apply ReflectT. apply H. auto.
-  + apply ReflectF. intro. apply H in H0. inversion H0.
+  + split; auto. intro. rewrite H1 in H2. inversion H2.
+- intros. inversion H. destruct b.
+  + apply ReflectT. split; auto.
+  + apply ReflectF. split; auto. intro. apply H0 in H2.
+  inversion H2.
 Qed.
 
 Theorem lebP : forall n m, reflect (le n m) (leb n m).
-Proof. intros. apply reflect_iff.
-Require Import Omega. split.
+Proof. intros. apply reflect_iff. split.
 - apply leb_correct.
 - apply leb_complete. Qed.
 

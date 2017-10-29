@@ -1,0 +1,12 @@
+Require Export Ensembles.
+
+Definition In (U:Type) (A:Ensemble U) (x:U) : Prop :=
+  A x.
+
+Print Ensemble.
+
+Definition nonzero : Ensemble nat :=
+  fun (n: nat) => n <> 0.
+
+Lemma notzero : ~ In nat nonzero 0.
+Proof. unfold In. unfold nonzero. auto. Qed.

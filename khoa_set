@@ -1,0 +1,30 @@
+Require Export Sets.Constructive_sets.
+
+Variable U: Type.
+
+Lemma Extension': forall B C:Ensemble U,
+  B = C -> Same_set U B C.
+Proof. intros. unfold Same_set.
+unfold Included. unfold In. split; intros.
+- subst. assumption. - subst. assumption. Qed.
+
+Lemma Noone_in_empty' : forall x:U,
+  ~ In U (Empty_set U) x.
+Proof. intros. unfold In. intro.
+inversion H. Qed.
+
+Lemma Included_Empty' : forall A:Ensemble U,
+  Included U (Empty_set U) A.
+Proof. unfold Included. intros.
+apply Noone_in_empty' in H. exfalso. auto. Qed.
+
+Lemma Add_intro1 :
+  forall (A:Ensemble U) (x y:U),
+  In U A y -> In U (Add U A x) y.
+Proof. unfold In. intros. unfold Add.
+apply Union_introl. unfold In. assumption. Qed.
+
+
+
+
+

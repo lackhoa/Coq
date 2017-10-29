@@ -126,7 +126,8 @@ Proof. crush. Qed.
 
 Theorem mult_0_r : forall n:nat,
   n * 0 = 0.
-Proof. intros. omega. Qed.
+Proof. induction n; intros.
+- auto. - simpl. auto. Qed.
 
 Theorem plus_n_Sm : forall n m : nat,
   S (n + m) = n + (S m).
@@ -134,15 +135,14 @@ Proof. auto. Qed.
 
 Theorem plus_comm : forall n m : nat,
   n + m = m + n.
-Proof. intros. omega. Qed.
+Proof. induction n; intros.
+- auto. - simpl. rewrite IHn. apply plus_n_Sm.
 
 Theorem plus_assoc : forall n m p : nat,
   n + (m + p) = (n + m) + p.
-Proof. intros. omega. Qed.
+Proof. induction n; intros.
+- auto. - simpl. auto. Qed.
 
-Theorem plus_fuck_you : forall a b c d e f g h i j k l m n,
-  a + b + c + d + e + f + g + h + i + j + k + l + m + n = 
-  d + c + (a + b) + e + f + h + g + i + j + k + m + n + l. intros. omega. Qed.
 (** [] *)
 
 (** **** Exercise: 2 stars (double_plus)  *)
@@ -157,8 +157,7 @@ Fixpoint double (n:nat) :=
 (** Use induction to prove this simple fact about [double]: *)
 
 Lemma double_plus : forall n, double n = n + n .
-Proof. eapply nat_ind; auto. intros. simpl.
-rewrite H. omega. Qed.
+Proof.  induction n; intros.
 
 
 (** [] *)
@@ -241,7 +240,7 @@ Proof.
   intros n m p q.
   (* We just need to swap (n + m) for (m + n)... seems
      like plus_comm should do the trick! *)
-  rewrite -> plus_comm.
+  (*rewrite -> plus_comm.*)
   (* Doesn't work...Coq rewrote the wrong plus! *)
 Abort.
 
@@ -249,6 +248,11 @@ Abort.
     a local lemma stating that [n + m = m + n] (for the particular [m]
     and [n] that we are talking about here), prove this lemma using
     [plus_comm], and then use it to do the desired rewrite. *)
+
+Theorem plus_comm: forall n m,
+  n + m = m + n.
+Proof. induction n; intros; auto. simpl.
+rewrite IHn. rewrite plus_n_Sm. auto. Qed.
 
 Theorem plus_rearrange : forall n m p q : nat,
   (n + m) + (p + q) = (m + n) + (p + q).
@@ -555,8 +559,7 @@ Fixpoint nat_to_bin (n: nat) : bin := match n with
   | 0 => z
   | (S n') => incr (nat_to_bin n')
 end.
-(*Testing zone*)
-Compute (nat_to_bin 7). Compute (nat_to_bin 10).
+
 
 Theorem nat_bin_nat : forall (n : nat),
   bin_to_nat (nat_to_bin n) = n.
@@ -574,11 +577,6 @@ Fixpoint normalize (b: bin) : bin := match b with
   | st b' => st (normalize b')
 end.
 
-(*Testing normalize*)
-Compute normalize (t (t z)).
-Compute normalize (st (t (t (t z)))).
-Compute normalize (t (st (t (t z)))).
-Compute normalize (st (t (st (t (t z))))).
 
 Theorem bin_nat_bin_z : forall b: bin,
   nat_to_bin (bin_to_nat b) = z <-> normalize b = z.
@@ -610,7 +608,7 @@ Theorem bin_nat_bin : forall (b: bin),
   nat_to_bin (bin_to_nat b) = normalize b.
 Proof. induction b.
 - crush.
-- simpl. simpl in IHb.
+- simpl.
 
 
 

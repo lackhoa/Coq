@@ -6,6 +6,7 @@ R1574:1591 Coq.Strings.String <> <> lib
 R1609:1642 Coq.Logic.FunctionalExtensionality <> <> lib
 ind 2317:2318 <> id
 constr 2334:2335 <> Id
+R2345:2348 Coq.Init.Logic <> :type_scope:x_'->'_x not
 R2349:2350 Maps <> id ind
 R2339:2344 Coq.Strings.String <> string ind
 def 2365:2370 <> beq_id
@@ -51,10 +52,13 @@ R3674:3674 Maps <> x var
 R3679:3679 Maps <> y var
 R3714:3728 Maps <> beq_id_true_iff thm
 R3714:3728 Maps <> beq_id_true_iff thm
+R3714:3728 Maps <> beq_id_true_iff thm
+R3741:3758 Coq.Bool.Bool <> not_true_iff_false thm
 R3741:3758 Coq.Bool.Bool <> not_true_iff_false thm
 R3741:3758 Coq.Bool.Bool <> not_true_iff_false thm
 prf 3843:3854 <> false_beq_id
 R3871:3872 Maps <> id ind
+R3884:3890 Coq.Init.Logic <> :type_scope:x_'->'_x not
 R3901:3903 Coq.Init.Logic <> :type_scope:x_'='_x not
 R3891:3896 Maps <> beq_id def
 R3900:3900 Maps <> y var
@@ -65,7 +69,9 @@ R3878:3878 Maps <> x var
 R3883:3883 Maps <> y var
 R3940:3955 Maps <> beq_id_false_iff thm
 R3940:3955 Maps <> beq_id_false_iff thm
+R3940:3955 Maps <> beq_id_false_iff thm
 def 4923:4931 <> total_map
+R4947:4950 Coq.Init.Logic <> :type_scope:x_'->'_x not
 R4951:4951 Maps <> A var
 R4945:4946 Maps <> id ind
 def 5253:5259 <> t_empty
@@ -134,9 +140,11 @@ R7461:7461 Maps <> v var
 R7478:7485 Maps <> t_update def
 R7507:7517 Maps <> beq_id_refl thm
 R7507:7517 Maps <> beq_id_refl thm
+R7507:7517 Maps <> beq_id_refl thm
 prf 7791:7802 <> t_update_neq
 R7860:7868 Maps <> total_map def
 R7870:7870 Maps <> X var
+R7884:7889 Coq.Init.Logic <> :type_scope:x_'->'_x not
 R7910:7912 Coq.Init.Logic <> :type_scope:x_'='_x not
 R7891:7898 Maps <> t_update def
 R7905:7905 Maps <> v var
@@ -207,6 +215,7 @@ R9966:9972 Maps <> beq_idP thm
 prf 10273:10288 <> t_update_permute
 R10354:10362 Maps <> total_map def
 R10364:10364 Maps <> X var
+R10378:10385 Coq.Init.Logic <> :type_scope:x_'->'_x not
 R10386:10386 Coq.Init.Logic <> :type_scope:x_'='_x not
 R10420:10426 Coq.Init.Logic <> :type_scope:x_'='_x not
 R10460:10460 Coq.Init.Logic <> :type_scope:x_'='_x not
@@ -233,6 +242,7 @@ R10526:10533 Maps <> t_update def
 R10546:10552 Maps <> beq_idP thm
 R10562:10568 Maps <> beq_idP thm
 R10546:10552 Maps <> beq_idP thm
+R10562:10568 Maps <> beq_idP thm
 R10562:10568 Maps <> beq_idP thm
 def 10944:10954 <> partial_map
 R10968:10976 Maps <> total_map def
@@ -262,6 +272,7 @@ R11310:11313 Coq.Init.Datatypes <> None constr
 R11340:11344 Maps <> empty def
 R11355:11367 Maps <> t_apply_empty thm
 R11355:11367 Maps <> t_apply_empty thm
+R11355:11367 Maps <> t_apply_empty thm
 prf 11397:11405 <> update_eq
 R11422:11432 Maps <> partial_map def
 R11434:11434 Maps <> A var
@@ -276,9 +287,11 @@ R11468:11468 Maps <> v var
 R11495:11500 Maps <> update def
 R11511:11521 Maps <> t_update_eq thm
 R11511:11521 Maps <> t_update_eq thm
+R11511:11521 Maps <> t_update_eq thm
 prf 11553:11562 <> update_neq
 R11618:11628 Maps <> partial_map def
 R11630:11630 Maps <> X var
+R11644:11649 Coq.Init.Logic <> :type_scope:x_'->'_x not
 R11668:11670 Coq.Init.Logic <> :type_scope:x_'='_x not
 R11651:11656 Maps <> update def
 R11663:11663 Maps <> v var
@@ -291,6 +304,8 @@ R11638:11641 Coq.Init.Logic <> :type_scope:x_'<>'_x not
 R11636:11637 Maps <> x2 var
 R11642:11643 Maps <> x1 var
 R11717:11722 Maps <> update def
+R11733:11744 Maps <> t_update_neq thm
+R11733:11744 Maps <> t_update_neq thm
 R11733:11744 Maps <> t_update_neq thm
 R11733:11744 Maps <> t_update_neq thm
 prf 11783:11795 <> update_shadow
@@ -311,9 +326,11 @@ R11875:11875 Maps <> m var
 R11920:11925 Maps <> update def
 R11936:11950 Maps <> t_update_shadow thm
 R11936:11950 Maps <> t_update_shadow thm
+R11936:11950 Maps <> t_update_shadow thm
 prf 11982:11992 <> update_same
 R12014:12024 Maps <> partial_map def
 R12026:12026 Maps <> X var
+R12044:12049 Coq.Init.Logic <> :type_scope:x_'->'_x not
 R12062:12064 Coq.Init.Logic <> :type_scope:x_'='_x not
 R12050:12055 Maps <> update def
 R12061:12061 Maps <> v var
@@ -331,6 +348,7 @@ R12132:12144 Maps <> t_update_same thm
 prf 12161:12174 <> update_permute
 R12243:12253 Maps <> partial_map def
 R12255:12255 Maps <> X var
+R12269:12276 Coq.Init.Logic <> :type_scope:x_'->'_x not
 R12277:12277 Coq.Init.Logic <> :type_scope:x_'='_x not
 R12307:12313 Coq.Init.Logic <> :type_scope:x_'='_x not
 R12343:12343 Coq.Init.Logic <> :type_scope:x_'='_x not

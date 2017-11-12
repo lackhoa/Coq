@@ -139,7 +139,9 @@ Theorem progress' : forall t T,
 Proof.
   intros t.
   induction t; intros T Ht; auto.
-  (* FILL IN HERE *) Admitted.
+  - inversion Ht; subst. inversion H1.
+  - inversion Ht; subst. apply IHt1 in H2; apply IHt2 in H4.
+  clear IHt1; clear IHt2.
 (** [] *)
 
 (* ################################################################# *)

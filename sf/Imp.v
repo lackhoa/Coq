@@ -33,7 +33,9 @@ Require Import Coq.omega.Omega.
 Require Import Coq.Lists.List.
 Import ListNotations.
 
-Require Import Maps.
+Add LoadPath "/home/khoa/Coq/sf/".
+
+Require Export Maps.
 (* /IMPORTS *)
 
 (* ################################################################# *)

@@ -1,5 +1,6 @@
 (** * Stlc: The Simply Typed Lambda-Calculus *)
 
+Add LoadPath "/home/khoa/Coq/sf/".
 Require Import Maps.
 Require Import Smallstep.
 Require Import Types.
@@ -395,7 +396,7 @@ Inductive substi (s:tm) (x:id) : tm -> tm -> Prop :=
     substi s x t1 t1' ->
     substi s x t2 t2' ->
     substi s x (tapp t1 t2) (tapp t1' t2')
-  | s_abs1 (*Coincide with abstracted var*) : forall (x': id) (T: ty) (t: tm),
+  | s_abs1 (*Coincide with bound var*) : forall (x': id) (T: ty) (t: tm),
     x = x' ->
     substi s x (tabs  x' T t) (tabs  x' T t)
   | s_abs2 (*Different (doesn't coincide)*) : forall (x': id) (T: ty) (t t': tm),
@@ -774,8 +775,14 @@ Example typing_example_2_full :
        (tabs y (TArrow TBool TBool)
           (tapp (tvar y) (tapp (tvar y) (tvar x))))) \in
     (TArrow TBool (TArrow (TArrow TBool TBool) TBool)).
-Proof.
-  (* FILL IN HERE *) Admitted.
+Proof. apply T_Abs. apply T_Abs. eapply T_App.
+- apply T_Var. unfold update. unfold t_update.
+simpl. reflexivity.
+- eapply T_App.
+  + apply T_Var. unfold update. unfold t_update. simpl. reflexivity.
+  + apply T_Var. unfold update. unfold t_update. simpl. reflexivity.
+Qed.
+
 (** [] *)
 
 (** **** Exercise: 2 stars (typing_example_3)  *)
@@ -795,7 +802,15 @@ Example typing_example_3 :
                (tapp (tvar y) (tapp (tvar x) (tvar z)))))) \in
       T.
 Proof with auto.
-  (* FILL IN HERE *) Admitted.
+exists (TArrow (TArrow TBool TBool) (TArrow (TArrow TBool TBool) (TArrow TBool TBool))).
+eapply T_Abs. eapply T_Abs. eapply T_Abs. eapply T_App.
+-  eapply T_Var. unfold update. unfold t_update; unfold update.
+simpl. auto.
+- eapply T_App.
+  + eapply T_Var. unfold update; unfold t_update. simpl. auto.
+  + eapply T_Var. unfold update; unfold t_update. simpl. auto.
+Qed.
+
 (** [] *)
 
 (** We can also show that terms are _not_ typable.  For example, let's
@@ -837,8 +852,17 @@ Example typing_nonexample_3 :
           (tabs x S
              (tapp (tvar x) (tvar x))) \in
           T).
-Proof.
-  (* FILL IN HERE *) Admitted.
+Proof. intro. inversion H; clear H. inversion H0; clear H0.
+inversion H. subst. clear H.
+inversion H5; subst; clear H5.
+inversion H2; subst; clear H2.
+inversion H1; subst; clear H1.
+inversion H4; subst; clear H4.
+inversion H1; clear H1.
+induction T11. inversion H0. inversion H0; subst.
+apply IHT11_1 in H1. auto. (*Bitch you annoyed me!*)
+Qed.
+
 (** [] *)
 
 End STLC.

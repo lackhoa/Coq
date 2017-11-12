@@ -1,5 +1,7 @@
 (** * Smallstep: Small-step Operational Semantics *)
 
+Add LoadPath "/home/khoa/Coq/sf/".
+
 Require Import Coq.Arith.Arith.
 Require Import Coq.Arith.EqNat.
 Require Import Coq.omega.Omega.

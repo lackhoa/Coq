@@ -133,15 +133,50 @@ Qed.
 (** Show that progress can also be proved by induction on terms
     instead of induction on typing derivations. *)
 
+Theorem progress_tapp : forall T t1 t2,
+  empty |- (tapp t1 t2) \in T ->
+  (value t1 \/ exists t1', t1 ==> t1') ->
+  (value t2 \/ exists t2', t2 ==> t2') ->
+  exists t', tapp t1 t2 ==> t'.
+Proof. intros. destruct H0.
+- rename t1 into v1. destruct H1.
+  + (*Both are values*) inversion H0; subst.
+    * exists ([x0 := t2] t). apply ST_AppAbs; assumption.
+    * inversion H; subst. inversion H5.
+    * inversion H. inversion H5.
+  + (*v1 value, t2 step*) destruct H1 as [t2']. exists (tapp v1 t2').
+  apply ST_App2; assumption.
+- destruct H0 as [t1']. exists (tapp t1' t2). apply ST_App1; assumption.
+Qed.
+
+
 Theorem progress' : forall t T,
      empty |- t \in T ->
      value t \/ exists t', t ==> t'.
 Proof.
-  intros t.
-  induction t; intros T Ht; auto.
-  - inversion Ht; subst. inversion H1.
-  - inversion Ht; subst. apply IHt1 in H2; apply IHt2 in H4.
-  clear IHt1; clear IHt2.
+intros t.
+induction t; intros T Ht; auto.
+- inversion Ht; subst. inversion H1.
+- inversion Ht; subst. right. remember H2 as H2'.
+remember H4 as H4'. clear HeqH2'; clear HeqH4'.
+apply IHt1 in H2; apply IHt2 in H4; subst.
+clear IHt1; clear IHt2. (*Already did this part*)
+eapply progress_tapp; eauto.
+
+- right. inversion Ht; subst; clear Ht. inversion H3; subst; clear H3.
+  + inversion H. + assert (empty |- tapp t0 t4 \in TBool).
+  { eapply T_App; eauto. } apply IHt1 in H1.
+  destruct H1. inversion H1. (*Final blow*)
+  destruct H1. exists (tif x0 t2 t3); apply ST_If; auto.
+  + exists t2. apply ST_IfTrue; auto.
+  + exists t3; apply ST_IfFalse; auto.
+  + assert (empty |- (tif t0 t4 t5) \in TBool).
+   { apply T_If; auto. }
+  apply IHt1 in H2. destruct H2. * inversion H2.
+  * destruct H2 as [t'']. exists (tif t'' t2 t3).
+  apply ST_If. auto. Qed.
+
+
 (** [] *)
 
 (* ################################################################# *)
@@ -240,7 +275,31 @@ Definition closed (t:tm) :=
     understanding it is crucial to understanding substitution and its
     properties, which are really the crux of the lambda-calculus. *)
 
-(* FILL IN HERE *)
+(*
+        afi_var:
+        (nothing)
+        ----------
+        afi x (tvar x)
+        
+        afi_app1:
+        afi x t1
+        ---------------------
+        afi x (tapp t1 t2)
+        
+        afi_app2:
+        afi x t2
+        ------------------------
+        afi x (tapp t1 t2)
+        
+        afi_abs:
+        afi x t
+        x <> y
+        -------------------------
+        afi x (tabs y T t)
+
+        blah... blah... blah...
+
+*)
 (** [] *)
 
 (* ================================================================= *)
@@ -305,8 +364,12 @@ Qed.
 Corollary typable_empty__closed : forall t T,
     empty |- t \in T  ->
     closed t.
-Proof.
-  (* FILL IN HERE *) Admitted.
+Proof. intros t T H. intro x. intro.
+assert (exists T': ty, empty x = Some T').
+{ eapply free_in_context; eauto. }
+inversion H1. inversion H2. Qed.
+
+
 (** [] *)
 
 (** Sometimes, when we have a proof [Gamma |- t : T], we will need to
@@ -374,10 +437,13 @@ Proof with eauto.
     apply IHhas_type. intros x1 Hafi.
     (* the only tricky step... the [Gamma'] we use to
        instantiate is [update Gamma x T11] *)
-    unfold update. unfold t_update. destruct (beq_id x0 x1) eqn: Hx0x1...
-    rewrite beq_id_false_iff in Hx0x1. auto.
+    unfold update. unfold t_update.
+    destruct (beq_id x0 x1) eqn: Hx0x1...
+    rewrite beq_id_false_iff in Hx0x1. apply H0.
+    apply afi_abs; auto.
   - (* T_App *)
-    apply T_App with T11...
+    apply T_App with T11... (*Why is it so easy? Because the type is
+    already determined when you say that an application is well-typed*)
 Qed.
 
 (** Now we come to the conceptual heart of the proof that reduction
@@ -595,8 +661,17 @@ Corollary soundness : forall t t' T,
 Proof.
   intros t t' T Hhas_type Hmulti. unfold stuck.
   intros [Hnf Hnot_val]. unfold normal_form in Hnf.
-  induction Hmulti.
-  (* FILL IN HERE *) Admitted.
+  induction Hmulti; rename x0 into t.
+  - assert (value t \/ (exists t' : tm, t ==> t')).
+  { eapply progress. eauto. }
+  destruct H; auto.
+  
+  - rename y0 into t'. rename z0 into t''.
+  (*Even if we shorten the multi-step chain, the proof wouldn't change*)
+  apply IHHmulti.
+    + eapply preservation; eauto.
+    + eauto. + eauto. Qed.
+
 (** [] *)
 
 (* ################################################################# *)
@@ -607,7 +682,21 @@ Proof.
     given term (in a given context) has at most one type. *)
 (** Formalize this statement and prove it. *)
 
-(* FILL IN HERE *)
+Theorem types_unique:
+  forall (t: tm) (Gamma : id -> option ty) (T1 T2: ty),
+  Gamma |- t \in T1 ->
+  Gamma |- t \in T2 ->
+  T1 = T2.
+Proof. intros t Gamma T1 T2 H1. generalize dependent T2.
+induction H1; intros.
+- inversion H0; subst. rewrite H in H3. inversion H3; auto.
+- rename x0 into t. inversion H; subst.
+  apply IHhas_type in H6. rewrite H6; auto.
+- inversion H; subst. apply IHhas_type1 in H3.
+  inversion H3. reflexivity.
+- inversion H. reflexivity. - inversion H; reflexivity.
+- inversion H; auto. Qed.
+
 (** [] *)
 
 (* ################################################################# *)
@@ -618,7 +707,15 @@ Proof.
     and preservation theorems for the simply typed lambda-calculus (as 
     Coq theorems). *) 
 
-(* FILL IN HERE *)
+Definition khoa_progress: forall (t: tm) (T: ty),
+  empty |- t \in T ->
+  value t \/ (exists t', t ==> t') := progress.
+  
+Definition khoa_preservation : forall (t t': tm) (T: ty),
+  empty |- t \in T ->
+  t ==> t' ->
+  empty |- t' \in T := preservation.
+
 (** [] *)
 
 (** **** Exercise: 2 starsM (stlc_variation1)  *)
@@ -638,11 +735,12 @@ and the following typing rule:
     false, give a counterexample.
 
       - Determinism of [step]
-(* FILL IN HERE *)
+(* becomes false: everything can either be reduced to zap or the term 
+that it would have been reduced to weren't it for zap *)
       - Progress
-(* FILL IN HERE *)
+(* remains true (everything can be zap, which can always be reduced to itself)*)
       - Preservation
-(* FILL IN HERE *)
+(* remains true: zap doesn't change your type, baby! *)
 []
 *)
 
@@ -662,11 +760,11 @@ and the following typing rule:
     false, give a counterexample.
 
       - Determinism of [step]
-(* FILL IN HERE *)
+(* becomes false: obvious it fucks up abstraction *)
       - Progress
-(* FILL IN HERE *)
+(* remains true *)
       - Preservation
-(* FILL IN HERE *)
+(* becomes false: foo ==> true? GTFO! *)
 []
 *)
 
@@ -678,11 +776,11 @@ and the following typing rule:
     false, give a counterexample.
 
       - Determinism of [step]
-(* FILL IN HERE *)
+(* remains true *)
       - Progress
-(* FILL IN HERE *)
+(* becomes false: if t1 can't make a step, what can we do? *)
       - Preservation
-(* FILL IN HERE *)
+(* remains true: the type doesn't get messed up *)
 []
 *)
 
@@ -699,11 +797,11 @@ and the following typing rule:
     false, give a counterexample.
 
       - Determinism of [step]
-(* FILL IN HERE *)
+(* becomes false: obviously *)
       - Progress
-(* FILL IN HERE *)
+(* remains true: true isn't that bad of a destination *)
       - Preservation
-(* FILL IN HERE *)
+(* becomes false: the type of t1 and t2 get thrown out the window *)
 []
 *)
 
@@ -722,11 +820,12 @@ and the following typing rule:
     false, give a counterexample.
 
       - Determinism of [step]
-(* FILL IN HERE *)
+(* remains true: only the typing is affected *)
       - Progress
-(* FILL IN HERE *)
+(* becomes false: t1 t2 is not a value, but its type prevents it from
+stepping anywhere, so... it's stuck *)
       - Preservation
-(* FILL IN HERE *)
+(* becomes false: obviously *)
 []
 *)
 
@@ -745,11 +844,12 @@ and the following typing rule:
     false, give a counterexample.
 
       - Determinism of [step]
-(* FILL IN HERE *)
+(* remains true *)
       - Progress
-(* FILL IN HERE *)
+(* becomes false: wtf can (t1 t2) be? They aren't value, where can they go? *)
       - Preservation
-(* FILL IN HERE *)
+(* remains true: obviously t1 and t2 can't just be "glued" together to make
+t1 and t2, no harm can be done *)
 []
 *)
 
@@ -766,11 +866,11 @@ and the following typing rule:
     false, give a counterexample.
 
       - Determinism of [step]
-(* FILL IN HERE *)
+(* remains true: no harm being done to step *)
       - Progress
-(* FILL IN HERE *)
+(* becomes false: [\x:Bool. t] can't go anywhere *)
       - Preservation
-(* FILL IN HERE *)
+(* remains true: same as determinism *)
 []
 *)
 
@@ -826,10 +926,210 @@ Inductive tm : Type :=
       of the original STLC to deal with the new syntactic forms.  Make
       sure Coq accepts the whole file. *)
 
-(* FILL IN HERE *)
+Inductive value : tm -> Prop :=
+  | v_abs: forall x T t, value (tabs x T t)
+  | v_nat: forall n, value (tnat n).
+  
+Hint Constructors value.
+
+Fixpoint subst (x:id) (s:tm) (t:tm) : tm :=
+  match t with
+  | tvar x' =>
+      if beq_id x x' then s else t
+  | tabs x' T t1 =>
+      tabs x' T (if beq_id x x' then t1 else ([x:=s] t1))
+  | tapp t1 t2 =>
+      tapp ([x:=s] t1) ([x:=s] t2)
+  | tnat n => tnat n
+  | tsucc t' => tsucc ([x:=s] t')
+  | tpred t' => tpred ([x:=s] t')
+  | tmult t1 t2 => tmult ([x:=s] t1) ([x:=s] t2)
+  | tif0 t1 t2 t3 => tif0 ([x:=s] t1) ([x:=s] t2) ([x:=s] t3)
+  end
+where "'[' x ':=' s ']' t" := (subst x s t).
+
+Reserved Notation "t1 '==>' t2" (at level 40).
+
+Inductive step : tm -> tm -> Prop :=
+  | ST_AppAbs : forall x T t12 v2,
+         value v2 ->
+         (tapp (tabs x T t12) v2) ==> [x:=v2]t12
+  | ST_App1 : forall t1 t1' t2,
+         t1 ==> t1' ->
+         tapp t1 t2 ==> tapp t1' t2
+  | ST_App2 : forall v1 t2 t2',
+         value v1 ->
+         t2 ==> t2' ->
+         tapp v1 t2 ==> tapp v1  t2'
+
+  | ST_Succ : forall n,
+    (tsucc (tnat n)) ==> (tnat (S n))
+  | ST_Succ' : forall t t',
+    t ==> t' ->
+    (tsucc t) ==> (tsucc t')
+
+  | ST_Pred : forall n,
+    (tpred (tnat n)) ==> (tnat (pred n))
+  | ST_Pred' : forall t t',
+    t ==> t' ->
+    (tpred t) ==> (tpred t')
+
+  | ST_Mult : forall n1 n2,
+    (tmult (tnat n1) (tnat n2)) ==> (tnat (n1 * n2))
+  | ST_Mult'0 : forall t1 t1' t2,
+    t1 ==> t1' ->
+    (tmult t1 t2) ==> (tmult t1' t2)
+  | ST_Mult'1 : forall t1 t2 t2',
+    t2 ==> t2' ->
+    (tmult t1 t2) ==> (tmult t1 t2')
+
+  | ST_If0_True : forall n t2 t3,
+    n = 0 ->
+    (tif0 (tnat n) t2 t3) ==> t2
+  | ST_If0_False : forall n t2 t3,
+    n <> 0 ->
+    (tif0 (tnat n) t2 t3) ==> t3
+  | ST_If0' : forall t1 t1' t2 t3,
+    t1 ==> t1' ->
+    (tif0 t1 t2 t3) ==> (tif0 t1' t2 t3)
+  
+where "t1 '==>' t2" := (step t1 t2).
+
+Hint Constructors step.
+Definition context := partial_map ty.
+
+Reserved Notation "Gamma '|-' t '\in' T" (at level 40).
+
+Inductive has_type : context -> tm -> ty -> Prop :=
+  | T_Var : forall Gamma x T,
+      Gamma x = Some T ->
+      Gamma |- tvar x \in T
+  | T_Abs : forall Gamma x T11 T12 t12,
+      update Gamma x T11 |- t12 \in T12 ->
+      Gamma |- tabs x T11 t12 \in TArrow T11 T12
+  | T_App : forall T11 T12 Gamma t1 t2,
+      Gamma |- t1 \in TArrow T11 T12 ->
+      Gamma |- t2 \in T11 ->
+      Gamma |- tapp t1 t2 \in T12
+
+  | T_Nat : forall n Gamma,
+    Gamma |- tnat n \in TNat
+  | T_Succ : forall t Gamma,
+    Gamma |- t \in TNat ->
+    Gamma |- tsucc t \in TNat
+  | T_Pred : forall t Gamma,
+    Gamma |- t \in TNat ->
+    Gamma |- tpred t \in TNat
+  | T_Mult : forall t1 t2 Gamma,
+    Gamma |- t1 \in TNat ->
+    Gamma |- t2 \in TNat ->
+    Gamma |- tmult t1 t2 \in TNat
+  | T_If0 : forall t1 t2 t3 T Gamma,
+    Gamma |- t1 \in TNat ->
+    Gamma |- t2 \in T ->
+    Gamma |- t3 \in T ->
+    Gamma |- tif0 t1 t2 t3 \in T
+
+where "Gamma '|-' t '\in' T" := (has_type Gamma t T).
+
+Hint Constructors has_type.
+
+Lemma canonical_forms_nat : forall t,
+  empty |- t \in TNat ->
+  value t ->
+  exists n, (t = tnat n).
+Proof.
+  intros t Ht Hv. inversion Hv; subst. inversion Ht.
+  eauto. Qed.
+
+Lemma canonical_forms_fun : forall t T1 T2,
+  empty |- t \in (TArrow T1 T2) ->
+  value t ->
+  exists x u, t = tabs x T1 u.
+Proof.
+  intros t T1 T2 HT HVal.
+  inversion HVal; intros; subst; try inversion HT; subst; auto.
+  exists x0. exists t0.  auto.
+Qed.
+
+Theorem progress : forall t T,
+     empty |- t \in T ->
+     value t \/ exists t', t ==> t'.
+Proof with eauto.
+  intros t T Ht.
+  remember (@empty ty) as Gamma.
+  induction Ht; subst Gamma...
+  - (* T_Var *)
+    (* contradictory: variables cannot be typed in an
+       empty context *)
+    inversion H.
+
+  - (* T_App *)
+    (* [t] = [t1 t2].  Proceed by cases on whether [t1] is a
+       value or steps... *)
+    right. destruct IHHt1...
+    + (* t1 is a value *)
+      destruct IHHt2...
+      * (* t2 is also a value *)
+        assert (exists x0 t0, t1 = tabs x0 T11 t0).
+        eapply canonical_forms_fun; eauto.
+        destruct H1 as [x0 [t0 Heq]]. subst.
+        exists ([x0:=t2]t0)...
+
+      * (* t2 steps *)
+        inversion H0 as [t2' Hstp]. exists (tapp t1 t2')...
+
+    + (* t1 steps *)
+      inversion H as [t1' Hstp]. exists (tapp t1' t2)...
+
+  - right. assert (@empty ty = @empty ty) by reflexivity.
+  apply IHHt in H; clear IHHt. destruct H.
+    + assert (exists n, (t = tnat n)).
+    { apply canonical_forms_nat; auto. }
+    destruct H0 as [n]. exists (tnat (S n)).
+    subst. apply ST_Succ.
+    + destruct H. eauto.
+  - right. assert (@empty ty = @empty ty) by reflexivity.
+  apply IHHt in H; clear IHHt. destruct H.
+    + assert (exists n, (t = tnat n)).
+    { apply canonical_forms_nat; auto. }
+    destruct H0 as [n]. exists (tnat (pred n)).
+    subst. apply ST_Pred.
+    + destruct H. eauto.
+  - right. assert (@empty ty = @empty ty) by reflexivity.
+  remember H as H'. clear HeqH'.
+  apply IHHt1 in H; clear IHHt1.
+  apply IHHt2 in H'; clear IHHt2.
+  destruct H; destruct H'.
+    + assert (exists n, (t1 = tnat n)).
+    { apply canonical_forms_nat; auto. }
+    assert (exists n, (t2 = tnat n)).
+    { apply canonical_forms_nat; auto. }
+    destruct H1 as [n1]. destruct H2 as [n2]. subst.
+    exists (tnat (n1 * n2)). apply ST_Mult.
+    + destruct H0. eauto. + destruct H. eauto.
+    + destruct H; eauto.
+  
+  - right. assert (value t3 \/ (exists t' : tm, t3 ==> t')).
+  auto. assert (value t2 \/ (exists t' : tm, t2 ==> t')). auto.
+  assert (value t1 \/ (exists t' : tm, t1 ==> t')). auto.
+  clear IHHt1; clear IHHt2; clear IHHt3. destruct H1.
+    + assert (exists n, (t1 = tnat n)).
+    { apply canonical_forms_nat; auto. }
+    destruct H2 as [n]. subst. destruct n. eauto.
+    exists t3. eapply ST_If0_False. auto.
+
+    + destruct H1 as [t1']. eauto. Qed.
+
 (** [] *)
 
 End STLCArith.
 
 (** $Date: 2016-12-20 12:03:19 -0500 (Tue, 20 Dec 2016) $ *)
+
+
+
+
+
+
 

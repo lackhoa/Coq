@@ -1,0 +1,50 @@
+DIGEST d598e8cf4858a915edf70a19a7b1fa38
+Fcarrier
+R15:24 Coq.setoid_ring.ZArithRing <> <> lib
+R42:47 Coq.ZArith.ZArith <> <> lib
+modtype 63:69 <> Carrier
+ax 82:82 Carrier A
+ax 101:104 Carrier Aopp
+R109:112 Coq.Init.Logic <> :type_scope:x_'->'_x not
+R113:113 carrier Carrier A defax
+R108:108 carrier Carrier A defax
+ax 128:132 Carrier Aplus
+ax 134:139 Carrier Aminus
+ax 141:145 Carrier Amult
+R149:152 Coq.Init.Logic <> :type_scope:x_'->'_x not
+R154:157 Coq.Init.Logic <> :type_scope:x_'->'_x not
+R158:158 carrier Carrier A defax
+R153:153 carrier Carrier A defax
+R148:148 carrier Carrier A defax
+ax 174:175 Carrier A0
+ax 183:184 Carrier A1
+R179:179 carrier Carrier A defax
+R188:188 carrier Carrier A defax
+ax 199:204 Carrier A_ring
+R208:218 Coq.setoid_ring.Ring_theory <> ring_theory rec
+R251:252 Coq.Init.Logic <> eq ind
+R257:257 carrier Carrier A defax
+R245:248 carrier Carrier Aopp defax
+R238:243 carrier Carrier Aminus defax
+R232:236 carrier Carrier Amult defax
+R226:230 carrier Carrier Aplus defax
+R223:224 carrier Carrier A1 defax
+R220:221 carrier Carrier A0 defax
+R267:273 carrier Carrier <> modtype
+R289:295 carrier Carrier <> mod
+mod 284:285 <> Zc
+def 310:310 Zc A
+R315:315 Coq.Numbers.BinNums <> Z ind
+def 329:332 Zc Aopp
+R337:340 Coq.ZArith.BinInt <> Zopp syndef
+def 354:358 Zc Aplus
+R363:367 Coq.ZArith.BinInt <> Zplus syndef
+def 381:386 Zc Aminus
+R391:396 Coq.ZArith.BinInt <> Zminus syndef
+def 410:414 Zc Amult
+R419:423 Coq.ZArith.BinInt <> Zmult syndef
+def 437:438 Zc A0
+def 459:460 Zc A1
+def 482:487 Zc A_ring
+R492:506 Coq.setoid_ring.InitialRing <> Zth thm
+R514:515 carrier Zc <> mod

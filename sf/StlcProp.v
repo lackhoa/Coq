@@ -976,12 +976,12 @@ Inductive step : tm -> tm -> Prop :=
 
   | ST_Mult : forall n1 n2,
     (tmult (tnat n1) (tnat n2)) ==> (tnat (n1 * n2))
-  | ST_Mult'0 : forall t1 t1' t2,
+  | ST_Mult'1 : forall t1 t1' t2,
     t1 ==> t1' ->
     (tmult t1 t2) ==> (tmult t1' t2)
-  | ST_Mult'1 : forall t1 t2 t2',
-    t2 ==> t2' ->
-    (tmult t1 t2) ==> (tmult t1 t2')
+  | ST_Mult'2 : forall v1 t2 t2', (*Note the order of reduction*)
+    value v1 -> t2 ==> t2' ->
+    (tmult v1 t2) ==> (tmult v1 t2')
 
   | ST_If0_True : forall n t2 t3,
     n = 0 ->
@@ -989,7 +989,7 @@ Inductive step : tm -> tm -> Prop :=
   | ST_If0_False : forall n t2 t3,
     n <> 0 ->
     (tif0 (tnat n) t2 t3) ==> t3
-  | ST_If0' : forall t1 t1' t2 t3,
+  | ST_If0 : forall t1 t1' t2 t3,
     t1 ==> t1' ->
     (tif0 t1 t2 t3) ==> (tif0 t1' t2 t3)
   
@@ -1121,11 +1121,581 @@ Proof with eauto.
 
     + destruct H1 as [t1']. eauto. Qed.
 
+Inductive appears_free_in : id -> tm -> Prop :=
+  | afi_var : forall x,
+      appears_free_in x (tvar x)
+  | afi_app1 : forall x t1 t2,
+      appears_free_in x t1 -> appears_free_in x (tapp t1 t2)
+  | afi_app2 : forall x t1 t2,
+      appears_free_in x t2 -> appears_free_in x (tapp t1 t2)
+  | afi_abs : forall x y T11 t12,
+      y <> x  ->
+      appears_free_in x t12 ->
+      appears_free_in x (tabs y T11 t12)
+  | afi_succ : forall x t,
+      appears_free_in x t ->
+      appears_free_in x (tsucc t)
+  | afi_pred : forall x t,
+      appears_free_in x t ->
+      appears_free_in x (tpred t)
+  | afi_mult1 : forall x t1 t2,
+      appears_free_in x t1 ->
+      appears_free_in x (tmult t1 t2)
+  | afi_mult2 : forall x t1 t2,
+      appears_free_in x t2 ->
+      appears_free_in x (tmult t1 t2)
+  | afi_if0_1 : forall x t1 t2 t3,
+      appears_free_in x t1 ->
+      appears_free_in x (tif0 t1 t2 t3)
+  | afi_if0_2 : forall x t1 t2 t3,
+      appears_free_in x t2 ->
+      appears_free_in x (tif0 t1 t2 t3)
+  | afi_if0_3 : forall x t1 t2 t3,
+      appears_free_in x t3 ->
+      appears_free_in x (tif0 t1 t2 t3).
+
+Hint Constructors appears_free_in.
+
+Definition closed (t:tm) :=
+  forall x, ~ appears_free_in x t.
+
+Lemma free_in_context : forall x t T Gamma,
+   appears_free_in x t ->
+   Gamma |- t \in T ->
+   exists T', Gamma x = Some T'.
+
+Proof.
+  intros x t T Gamma H H0. generalize dependent Gamma.
+  generalize dependent T.
+  induction H;
+         intros; try solve [inversion H0; eauto].
+  - (* afi_abs *)
+    inversion H1; subst.
+    apply IHappears_free_in in H7.
+    rewrite update_neq in H7; assumption.
+Qed.
+
+Corollary typable_empty__closed : forall t T,
+    empty |- t \in T  ->
+    closed t.
+Proof. intros t T H. intro x. intro.
+assert (exists T': ty, empty x = Some T').
+{ eapply free_in_context; eauto. }
+inversion H1. inversion H2. Qed.
+
+Lemma context_invariance : forall Gamma Gamma' t T,
+     Gamma |- t \in T  ->
+     (forall x, appears_free_in x t -> Gamma x = Gamma' x) ->
+     Gamma' |- t \in T.
+Proof with eauto.
+  intros.
+  generalize dependent Gamma'.
+  induction H; intros; auto.
+  - (* T_Var *)
+    apply T_Var. rewrite <- H0...
+  - (* T_Abs *)
+    apply T_Abs.
+    apply IHhas_type. intros x1 Hafi.
+    (* the only tricky step... the [Gamma'] we use to
+       instantiate is [update Gamma x T11] *)
+    unfold update. unfold t_update.
+    destruct (beq_id x0 x1) eqn: Hx0x1...
+    rewrite beq_id_false_iff in Hx0x1. apply H0.
+    apply afi_abs; auto.
+  - (* T_App *)
+    apply T_App with T11...
+Qed.
+
+Lemma substitution_preserves_typing : forall Gamma x U t v T,
+     update Gamma x U |- t \in T ->
+     empty |- v \in U   ->
+     Gamma |- [x:=v]t \in T.
+ Proof with eauto.
+  intros Gamma x U t v T Ht Ht'.
+  generalize dependent Gamma. generalize dependent T.
+  induction t; intros T Gamma H;
+    (* in each case, we'll want to get at the derivation of H *)
+    inversion H; subst; simpl...
+  - (* tvar *)
+    rename i into y. destruct (beq_idP x y) as [Hxy|Hxy].
+    + (* x=y *)
+      subst.
+      rewrite update_eq in H2.
+      inversion H2; subst. 
+      eapply context_invariance. eassumption.
+      apply typable_empty__closed in Ht'. unfold closed in Ht'.
+      intros.  apply (Ht' x0) in H0. inversion H0.
+    + (* x<>y *)
+      apply T_Var. rewrite update_neq in H2...
+  - (* tabs *)
+    rename i into y. rename t into T. apply T_Abs.
+    destruct (beq_idP x y) as [Hxy | Hxy].
+    + (* x=y *)
+      subst. rewrite update_shadow in H5. apply H5.
+    + (* x<>y *)
+      apply IHt. eapply context_invariance...
+      intros z Hafi. unfold update, t_update.
+      destruct (beq_idP y z) as [Hyz | Hyz]; subst; trivial.
+      rewrite <- beq_id_false_iff in Hxy.
+      rewrite Hxy...
+Qed.
+
+Theorem preservation : forall t t' T,
+     empty |- t \in T  ->
+     t ==> t'  ->
+     empty |- t' \in T.
+Proof with eauto.
+  remember (@empty ty) as Gamma.
+  intros t t' T HT. generalize dependent t'.
+  induction HT;
+       intros t' HE; subst Gamma; subst;
+       try solve [inversion HE; subst; auto].
+  - (* T_App *)
+    inversion HE; subst...
+    (* Most of the cases are immediate by induction,
+       and [eauto] takes care of them *)
+    + (* ST_AppAbs *)
+      apply substitution_preserves_typing with T11...
+      inversion HT1...
+Qed.
+
+Definition stuck (t:tm) : Prop :=
+  (normal_form step) t /\ ~ value t.
+
+Reserved Notation "t1 '==>' t2" (at level 40).
+
+Notation multistep := (multi step).
+Notation "t1 '==>*' t2" := (multistep t1 t2) (at level 40).
+
+Corollary soundness : forall t t' T,
+  empty |- t \in T ->
+  t ==>* t' ->
+  ~(stuck t').
+Proof.
+  intros t t' T Hhas_type Hmulti. unfold stuck.
+  intros [Hnf Hnot_val]. unfold normal_form in Hnf.
+  induction Hmulti; rename x0 into t.
+  - assert (value t \/ (exists t' : tm, t ==> t')).
+  { eapply progress. eauto. }
+  destruct H; auto.
+  
+  - rename y0 into t'. rename z0 into t''.
+  (*Even if we shorten the multi-step chain, the proof wouldn't change*)
+  apply IHHmulti.
+    + eapply preservation; eauto.
+    + eauto. + eauto.
+Qed.
+
+Theorem types_unique:
+  forall (t: tm) (Gamma : id -> option ty) (T1 T2: ty),
+  Gamma |- t \in T1 ->
+  Gamma |- t \in T2 ->
+  T1 = T2.
+Proof. intros t Gamma T1 T2 H1. generalize dependent T2.
+induction H1; intros.
+- inversion H0; subst. rewrite H in H3. inversion H3; auto.
+- rename x0 into t. inversion H; subst.
+  apply IHhas_type in H6. rewrite H6; auto.
+- inversion H; subst. apply IHhas_type1 in H3.
+  inversion H3. reflexivity.
+- inversion H. reflexivity. - inversion H; reflexivity.
+- inversion H; auto. - inversion H; auto. - inversion H; auto.
+Qed.
+
+Lemma preservation_multi : forall t t' T,
+     empty |- t \in T  ->
+     t ==>* t'  ->
+     empty |- t' \in T.
+Proof. intros t t' T HType HMulti.
+induction HMulti; intros.
+- assumption.
+- assert (empty |- y0 \in T). { eapply preservation; eauto. }
+eapply IHHMulti; eauto. Qed.
+
+(*This doesn't happen*)
+(*Theorem deterministic : forall t t1 t2,
+  t ==> t1 -> t ==> t2 -> t1 = t2.*)
+
+
+
+(*Lemma let_it_out : forall t T11 T12,
+  empty |- t \in TArrow T11 T12 ->
+  exists t', t ==>* t' /\ value t'.
+Proof. intro. induction t; intros.
+- inversion H; subst. inversion H2.
+- inversion H; subst. inversion H5.*)
+
+(*Okay, so that's it!*)
+(* But the question remains: does it halt?*)
+Theorem halt : forall t T,
+  empty |- t \in T ->
+  exists t', value t' /\ t ==>* t'.
+Proof.
+(*Induction on t: There's nothing to
+support application*)
+(*intros t. induction t; intros.
+- inversion H. inversion H2.
+- inversion H; subst. rename T11 into T0.
+remember H3 as Ht1. clear HeqHt1.
+apply IHt1 in H3.
+remember H5 as Ht2; clear HeqHt2.
+apply IHt2 in H5.
+destruct H3 as [t1']. destruct H5 as [t2'].
+destruct H0; destruct H1. exists *)
+
+
+
+
+
+(*Induction on type: Nothing to support from T
+to TArrow T ..*)
+(*intros t T. generalize dependent t.
+induction T; intros.
+- *)
+
+
+
+
+(*Induction on has_type: again, what to do after
+application? *)
+intros t T HType. remember empty as Gamma.
+induction HType; subst.
+- inversion H.
+- exists (tabs x0 T11 t12); eauto.
+- assert (@empty ty = @empty ty) as fuck1; auto.
+apply IHHType1 in fuck1; clear IHHType1.
+assert (@empty ty = @empty ty) as fuck2; auto;
+apply IHHType2 in fuck2; clear IHHType2.
+destruct fuck1 as [t1']; destruct fuck2 as [t2'].
+destruct H. destruct H.
+  + destruct H0. exists ([x0:=t2'] t). rename x0 into x.
+  assert (empty |- (tabs x T t) \in (TArrow T11 T12)).
+  { eapply preservation_multi; eauto. }
+  inversion H2; subst.
+
+  assert (empty |- t2' \in T11). { eapply preservation_multi; eauto. }
+  assert (empty |- [x := t2'] t \in T12).
+  { eapply substitution_preserves_typing; eauto. }
+Abort.
+
+(*Number of appearance of a variable in a single term*)
+Fixpoint appears_count (x : id) (t: tm) : nat :=
+  match t with
+  | tvar x' =>
+      match beq_id x x' with
+      | true => 1
+      | false => 0
+      end
+  | tapp t1 t2 =>
+      (appears_count x t1) + (appears_count x t2)
+  | tabs x' T t1 =>
+      match beq_id x x' with
+        | true => 0 (*bound collision*)
+        | false => appears_count x t1
+        end
+  | tnat _ => 0
+  | tsucc t' => appears_count x t'
+  | tpred t' => appears_count x t'
+  | tmult t1 t2 =>
+      (appears_count x t2) + (appears_count x t2)
+  | tif0 t1 t2 t3 =>
+      (appears_count x t1) + (appears_count x t2) +
+        (appears_count x t3)
+  end.
+
+Lemma app_multi_step_1 : forall t1 t2 t1',
+  t1 ==>* t1' ->
+  tapp t1 t2 ==>* tapp t1' t2.
+Proof. intros. generalize dependent t2. induction H.
+- eauto.
+- rename x0 into x; rename y0 into y; rename z0 into z.
+intros. assert (tapp x t2 ==> tapp y t2).
+{ apply ST_App1. assumption. }
+
+eapply multi_step; eauto.
+Qed.
+
+Lemma app_multi_step_2 : forall v1 t2 t2',
+  t2 ==>* t2' -> value v1 ->
+  tapp v1 t2 ==>* tapp v1 t2'.
+Proof. intros. generalize dependent v1. induction H.
+- eauto.
+- rename x0 into x; rename y0 into y; rename z0 into z.
+intros. assert (tapp v1 x ==> tapp v1 y).
+{ apply ST_App2; assumption. }
+
+eapply multi_step; eauto.
+Qed.
+
+Theorem app_multi_step : forall t1 t1' t2 t2',
+  t1 ==>* t1' -> value t1' -> t2 ==>* t2'->
+  tapp t1 t2 ==>* tapp t1' t2'.
+Proof.
+intros. induction H.
+- apply app_multi_step_2; assumption.
+- apply IHmulti in H0. clear IHmulti.
+assert (tapp x0 t2 ==> tapp y0 t2).
+{ apply ST_App1; assumption. }
+eapply multi_step; eauto.
+Qed.
+
+Lemma canonical_forms_serious : forall t T1 T2,
+  empty |- t \in (TArrow T1 T2) ->
+  exists t' x u, t' = tabs x T1 u /\ t ==>* t'.
+Proof. intros t. induction t; intros.
+- (*tvar*) inversion H. subst. inversion H2.
+- (*tapp*) inversion H; subst. apply IHt1 in H3.
+destruct H3. destruct H0. destruct H0. destruct H0.
+rename x0 into abs. rename x2 into t'.
+Abort. (*t2 must be a value...*)
+
+Theorem deterministic : forall t t1 t2,
+  t ==> t1 -> t ==> t2 -> t1 = t2.
+Proof. induction t; intros.
+- inversion H.
+- inversion H; inversion H0; subst.
+  + inversion H5. reflexivity.
+  + (*Impossibility: a value steps to somewhere?*)
+  inversion H8.
+  + inversion H4; subst. inversion H9. inversion H9.
+  + inversion H4.
+  + assert (t1' = t1'0) by (apply IHt1; auto). subst.
+  reflexivity.
+  + inversion H7; subst. inversion H4. inversion H4.
+  + inversion H9; subst; inversion H5.
+  + inversion H3; subst; inversion H9.
+  + assert (t2' = t2'0) by (apply IHt2; assumption).
+  subst. reflexivity.
+
+- inversion H.
+- inversion H.
+- inversion H; inversion H0; subst.
+  + inversion H4. reflexivity.
+  + inversion H4. + inversion H2.
+  + assert (t' = t'0) by (apply IHt; assumption);
+  subst; reflexivity.
+
+- inversion H; inversion H0; subst.
+  + inversion H4. reflexivity.
+  + inversion H4. + inversion H2.
+  + assert (t' = t'0) by (apply IHt; assumption);
+  subst; reflexivity.
+
+- inversion H; inversion H0; subst.
+  + inversion H5; inversion H6; subst; reflexivity.
+  + inversion H7. + inversion H8. + inversion H4.
+  + assert (t1' = t1'0) by (apply IHt1; assumption); subst.
+  reflexivity.
+  + inversion H7; subst; inversion H4.
+  + inversion H5. + inversion H3; subst; inversion H9.
+  + assert (t2' = t2'0) by (apply IHt2; assumption); subst.
+  reflexivity.
+
+- inversion H; inversion H0; subst; try auto.
+  + destruct H10. inversion H6. reflexivity.
+  + inversion H10. + inversion H6. destruct H5. auto.
+  + inversion H10. + inversion H5. + inversion H5.
+  + assert (t1' = t1'0) by (apply IHt1; assumption); subst.
+  reflexivity.
+Qed.
+
+(*if we can prove that the complexity of a term always decrease
+by one after every reduction step, we win!*)
+
+Inductive complex: tm -> nat -> Prop :=
+  | C_App: forall t1 t2 n1 n2 x T u,
+    complex t1 n1 -> complex t2 n2 ->
+    t1 ==>* (tabs x T u) ->
+    complex (tapp t1 t2) (n1 + (appears_count x t1) * n2 + 1)
+
+  | C_Abs: forall i T t n,
+    complex t n ->
+    complex (tabs i T t) n
+  | C_Nat: forall n, complex (tnat n) 0
+  | C_Succ: forall t n,
+    complex t n ->
+    complex (tsucc t) (n + 1)
+  | C_Pred: forall t n,
+    complex t n ->
+    complex (tsucc t) (n + 1)
+  | C_Mult: forall t1 t2 n1 n2,
+    complex t1 n1 -> complex t2 n2 ->
+    complex (tmult t1 t2) (n1 + n2 + 1)
+  | C_If0_True: forall t1 t2 t3 n1 n2,
+    complex t1 n1 -> complex t2 n2 ->
+    tif0 t1 t2 t3 ==>* t2 ->
+    complex (tif0 t1 t2 t3) (n1 + n2 + 1)
+  | C_If0_False: forall t1 t2 t3 n1 n3,
+    complex t1 n1 -> complex t3 n3 ->
+    tif0 t1 t2 t3 ==>* t3 ->
+    complex (tif0 t1 t2 t3) (n1 + n3 + 1).
+(*This is the NEW HOPE: complexity theory*)
+
+(*I initially used Fixpoint computation but 
+it was just so inflexible for the tif0 case (guess what?
+now I know what they were talking about when comparing
+Fixpoint and Inductive properties, it takes a long time,
+but it was worth it!*)
+
+Lemma value_subst: forall x s t,
+  value t -> value ([x := s] t).
+Proof. intros. inversion H.
+- simpl. destruct (beq_id x0 x1); apply v_abs.
+- simpl. apply v_nat.
+Qed.
+
+Lemma subst_order: forall u x s t,
+  [x := [x := s] t] u =
+  [x := s] ([x := t] u).
+Proof. intro u. induction u; intros.
+- simpl. remember (beq_id x0 i) as b.
+destruct b. reflexivity. simpl. rewrite <- Heqb.
+reflexivity.
+- simpl. assert ([x0 := [x0 := s] t] u1 = 
+  [x0 := s] ([x0 := t] u1)) by (apply IHu1).
+assert ([x0 := [x0 := s] t] u2 = 
+  [x0 := s] ([x0 := t] u2)) by (apply IHu2).
+rewrite H. rewrite H0. reflexivity.
+
+- simpl. remember (beq_id x0 i) as b. destruct b.
+reflexivity. assert ([x0 := [x0 := s] t0] u
+  = [x0 := s] ([x0 := t0] u)) by (apply IHu).
+rewrite H. reflexivity.
+
+- simpl. reflexivity.
+- simpl. assert ([x0 := [x0 := s] t] u =
+  [x0 := s] ([x0 := t] u)) by (apply IHu).
+rewrite H; reflexivity.
+- simpl. assert ([x0 := [x0 := s] t] u =
+  [x0 := s] ([x0 := t] u)) by (apply IHu).
+rewrite H; reflexivity.
+- simpl. assert ([x0 := [x0 := s] t] u1 =
+  [x0 := s] ([x0 := t] u1)) by (apply IHu1).
+assert ([x0 := [x0 := s] t] u2 =
+  [x0 := s] ([x0 := t] u2)) by (apply IHu2).
+rewrite H; rewrite H0; reflexivity.
+
+- simpl. assert ([x0 := [x0 := s] t] u1 =
+  [x0 := s] ([x0 := t] u1)) by (apply IHu1).
+assert ([x0 := [x0 := s] t] u2 =
+  [x0 := s] ([x0 := t] u2)) by (apply IHu2).
+assert ([x0 := [x0 := s] t] u3 =
+  [x0 := s] ([x0 := t] u3)) by (apply IHu3).
+rewrite H; rewrite H0; rewrite H1; reflexivity.
+Qed. (*Didn't think it would work!*)
+
+Lemma subst_order2: forall u x1 x0 s t,
+  [x1 := [x0 := s] t] ([x0 := s] u) =
+  [x0 := s] ([x1 := t] u).
+Proof.
+intro u; induction u; intros; simpl.
+- remember (beq_id x0 i) as b0.
+remember (beq_id x1 i) as b1.
+destruct b0; destruct b1.
+  + symmetry in Heqb0. apply beq_id_true_iff in Heqb0.
+  symmetry in Heqb1. apply beq_id_true_iff in Heqb1.
+  subst.
+
+Theorem subst_step : forall t t' x s,
+  t ==> t' -> [x := s] t ==> [x := s] t'.
+Proof.
+intro t; induction t; intros; subst.
+- inversion H.
+- inversion H; subst.
+  + simpl. destruct (beq_idP x0 x1).
+    * subst.
+    assert ((tapp (tabs x1 T t12) ([x1 := s] t2)) ==>
+      [x1 := ([x1 := s] t2)] t12).
+    { apply ST_AppAbs. inversion H3; subst.
+      - simpl. destruct (beq_idP x1 x0); apply v_abs.
+      - simpl. apply v_nat. }
+      
+    simpl. assert ([x1 := [x1 := s] t2] t12 =
+      [x1 := s] ([x1 := t2] t12)) by (apply subst_order).
+    rewrite <- H1. assumption.
+    
+    * assert (tapp (tabs x1 T ([x0 := s] t12)) ([x0 := s] t2) ==>
+      [x1 := [x0 := s] t2] ([x0 := s] t12)).
+    { apply ST_AppAbs. apply value_subst. assumption. }
+    
+    simpl.
+    
+      
+Require Import Omega.
+
+(*YES, I THINK THIS IS CORRECT, FIGHT ME!*)
+Theorem subst_complex : forall (x : id) s t nt ns,
+  complex t nt -> complex s ns ->
+  complex ([x := s] t)
+    (nt + (appears_count x t)*ns).
+Proof.
+intros x0 s t. generalize dependent x0;
+generalize dependent s; induction t; intros;
+rename x0 into x.
+- inversion H.
+- (*tapp*) simpl. inversion H; subst.
+
+assert (complex ([x := s] t1) (n1 + appears_count x
+  t1 * ns)).
+{ apply IHt1; auto. }
+clear IHt1.
+
+assert (complex ([x := s] t2) (n2 + appears_count x
+  t2 * ns)).
+{ apply IHt2; auto. }
+clear IHt2.
+
+remember (n1 + appears_count x t1 * ns) as n1'.
+remember (n2 + appears_count x t2 * ns) as n2'.
+
+assert (complex (tapp ([x := s] t1) ([x := s] t2))
+  (n1' + (appears_count x ([x := s] t1)) * n2' + 1)).
+{ eapply C_App; try assumption. }
+
+
+
+(*This is what I want to prove the most*)
+Theorem step_reduce_complex :
+  forall t t' n, t ==> t' ->
+  complex t n -> complex t' (n - 1).
+Proof. intros t; induction t; subst; intros.
+- inversion H.
+- inversion H0; subst. inversion H; subst.
+  + 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Definition self_app := tapp (tvar x) (tvar x).
+(*You can't write the loop function below*)
+Definition loop := (tabs x ??? (self_app self_app)).
+(*Is this well-typed? Probably no, but how can we prove that?*)
+Lemma loop_well_typed :
+  empty |- loop \in (TArrow Func Func)
+
 (** [] *)
 
 End STLCArith.
 
 (** $Date: 2016-12-20 12:03:19 -0500 (Tue, 20 Dec 2016) $ *)
+
+
+
+
+
+
+
 
 
 

@@ -1379,7 +1379,7 @@ destruct H. destruct H.
 Abort.
 
 (*Number of appearance of a variable in a single term*)
-Fixpoint appears_count (x : id) (t: tm) : nat :=
+Fixpoint afi_count (x : id) (t: tm) : nat :=
   match t with
   | tvar x' =>
       match beq_id x x' with
@@ -1387,20 +1387,20 @@ Fixpoint appears_count (x : id) (t: tm) : nat :=
       | false => 0
       end
   | tapp t1 t2 =>
-      (appears_count x t1) + (appears_count x t2)
+      (afi_count x t1) + (afi_count x t2)
   | tabs x' T t1 =>
       match beq_id x x' with
         | true => 0 (*bound collision*)
-        | false => appears_count x t1
+        | false => afi_count x t1
         end
   | tnat _ => 0
-  | tsucc t' => appears_count x t'
-  | tpred t' => appears_count x t'
+  | tsucc t' => afi_count x t'
+  | tpred t' => afi_count x t'
   | tmult t1 t2 =>
-      (appears_count x t2) + (appears_count x t2)
+      (afi_count x t2) + (afi_count x t2)
   | tif0 t1 t2 t3 =>
-      (appears_count x t1) + (appears_count x t2) +
-        (appears_count x t3)
+      (afi_count x t1) + (afi_count x t2) +
+        (afi_count x t3)
   end.
 
 Lemma app_multi_step_1 : forall t1 t2 t1',
@@ -1448,6 +1448,54 @@ Proof. intros t. induction t; intros.
 destruct H3. destruct H0. destruct H0. destruct H0.
 rename x0 into abs. rename x2 into t'.
 Abort. (*t2 must be a value...*)
+
+Lemma value_subst: forall x s t,
+  value t -> value ([x := s] t).
+Proof. intros. inversion H.
+- simpl. destruct (beq_id x0 x1); apply v_abs.
+- simpl. apply v_nat.
+Qed.
+
+Lemma subst_order: forall u x s t,
+  [x := [x := s] t] u =
+  [x := s] ([x := t] u).
+Proof. intro u. induction u; intros.
+- simpl. remember (beq_id x0 i) as b.
+destruct b. reflexivity. simpl. rewrite <- Heqb.
+reflexivity.
+- simpl. assert ([x0 := [x0 := s] t] u1 = 
+  [x0 := s] ([x0 := t] u1)) by (apply IHu1).
+assert ([x0 := [x0 := s] t] u2 = 
+  [x0 := s] ([x0 := t] u2)) by (apply IHu2).
+rewrite H. rewrite H0. reflexivity.
+
+- simpl. remember (beq_id x0 i) as b. destruct b.
+reflexivity. assert ([x0 := [x0 := s] t0] u
+  = [x0 := s] ([x0 := t0] u)) by (apply IHu).
+rewrite H. reflexivity.
+
+- simpl. reflexivity.
+- simpl. assert ([x0 := [x0 := s] t] u =
+  [x0 := s] ([x0 := t] u)) by (apply IHu).
+rewrite H; reflexivity.
+- simpl. assert ([x0 := [x0 := s] t] u =
+  [x0 := s] ([x0 := t] u)) by (apply IHu).
+rewrite H; reflexivity.
+- simpl. assert ([x0 := [x0 := s] t] u1 =
+  [x0 := s] ([x0 := t] u1)) by (apply IHu1).
+assert ([x0 := [x0 := s] t] u2 =
+  [x0 := s] ([x0 := t] u2)) by (apply IHu2).
+rewrite H; rewrite H0; reflexivity.
+
+- simpl. assert ([x0 := [x0 := s] t] u1 =
+  [x0 := s] ([x0 := t] u1)) by (apply IHu1).
+assert ([x0 := [x0 := s] t] u2 =
+  [x0 := s] ([x0 := t] u2)) by (apply IHu2).
+assert ([x0 := [x0 := s] t] u3 =
+  [x0 := s] ([x0 := t] u3)) by (apply IHu3).
+rewrite H; rewrite H0; rewrite H1; reflexivity.
+Qed. (*Didn't think it would work!*)
+
 
 Theorem deterministic : forall t t1 t2,
   t ==> t1 -> t ==> t2 -> t1 = t2.
@@ -1502,15 +1550,18 @@ Qed.
 (*if we can prove that the complexity of a term always decrease
 by one after every reduction step, we win!*)
 
-Inductive complex: tm -> nat -> Prop :=
+(*Inductive complex: tm -> nat -> Prop :=
+  | C_Var : forall i,
+    complex (tvar i) 0
   | C_App: forall t1 t2 n1 n2 x T u,
-    complex t1 n1 -> complex t2 n2 ->
+    complex t2 n2 -> complex t1 n1 ->
     t1 ==>* (tabs x T u) ->
-    complex (tapp t1 t2) (n1 + (appears_count x t1) * n2 + 1)
+    complex (tapp t1 t2) (n1 + (afi_count x u)*n2 + 1)
 
-  | C_Abs: forall i T t n,
-    complex t n ->
-    complex (tabs i T t) n
+  | C_Abs: forall i T t,
+    complex (tabs i T t) 0
+    (*I think this makes the most sense*)
+
   | C_Nat: forall n, complex (tnat n) 0
   | C_Succ: forall t n,
     complex t n ->
@@ -1529,6 +1580,7 @@ Inductive complex: tm -> nat -> Prop :=
     complex t1 n1 -> complex t3 n3 ->
     tif0 t1 t2 t3 ==>* t3 ->
     complex (tif0 t1 t2 t3) (n1 + n3 + 1).
+*)
 (*This is the NEW HOPE: complexity theory*)
 
 (*I initially used Fixpoint computation but 
@@ -1537,54 +1589,10 @@ now I know what they were talking about when comparing
 Fixpoint and Inductive properties, it takes a long time,
 but it was worth it!*)
 
-Lemma value_subst: forall x s t,
-  value t -> value ([x := s] t).
-Proof. intros. inversion H.
-- simpl. destruct (beq_id x0 x1); apply v_abs.
-- simpl. apply v_nat.
-Qed.
 
-Lemma subst_order: forall u x s t,
-  [x := [x := s] t] u =
-  [x := s] ([x := t] u).
-Proof. intro u. induction u; intros.
-- simpl. remember (beq_id x0 i) as b.
-destruct b. reflexivity. simpl. rewrite <- Heqb.
-reflexivity.
-- simpl. assert ([x0 := [x0 := s] t] u1 = 
-  [x0 := s] ([x0 := t] u1)) by (apply IHu1).
-assert ([x0 := [x0 := s] t] u2 = 
-  [x0 := s] ([x0 := t] u2)) by (apply IHu2).
-rewrite H. rewrite H0. reflexivity.
 
-- simpl. remember (beq_id x0 i) as b. destruct b.
-reflexivity. assert ([x0 := [x0 := s] t0] u
-  = [x0 := s] ([x0 := t0] u)) by (apply IHu).
-rewrite H. reflexivity.
-
-- simpl. reflexivity.
-- simpl. assert ([x0 := [x0 := s] t] u =
-  [x0 := s] ([x0 := t] u)) by (apply IHu).
-rewrite H; reflexivity.
-- simpl. assert ([x0 := [x0 := s] t] u =
-  [x0 := s] ([x0 := t] u)) by (apply IHu).
-rewrite H; reflexivity.
-- simpl. assert ([x0 := [x0 := s] t] u1 =
-  [x0 := s] ([x0 := t] u1)) by (apply IHu1).
-assert ([x0 := [x0 := s] t] u2 =
-  [x0 := s] ([x0 := t] u2)) by (apply IHu2).
-rewrite H; rewrite H0; reflexivity.
-
-- simpl. assert ([x0 := [x0 := s] t] u1 =
-  [x0 := s] ([x0 := t] u1)) by (apply IHu1).
-assert ([x0 := [x0 := s] t] u2 =
-  [x0 := s] ([x0 := t] u2)) by (apply IHu2).
-assert ([x0 := [x0 := s] t] u3 =
-  [x0 := s] ([x0 := t] u3)) by (apply IHu3).
-rewrite H; rewrite H0; rewrite H1; reflexivity.
-Qed. (*Didn't think it would work!*)
-
-Lemma subst_order2: forall u x1 x0 s t,
+(*Lemma subst_order2: forall u x1 x0 s t,
+  x0 <> x1 -> value t ->
   [x1 := [x0 := s] t] ([x0 := s] u) =
   [x0 := s] ([x1 := t] u).
 Proof.
@@ -1594,11 +1602,34 @@ remember (beq_id x1 i) as b1.
 destruct b0; destruct b1.
   + symmetry in Heqb0. apply beq_id_true_iff in Heqb0.
   symmetry in Heqb1. apply beq_id_true_iff in Heqb1.
-  subst.
+  subst. destruct H. reflexivity.
+  + simpl. rewrite <- Heqb0.
+*)
 
-Theorem subst_step : forall t t' x s,
+
+
+(*Theorem subst_step : forall t t' x s,
   t ==> t' -> [x := s] t ==> [x := s] t'.
 Proof.
+intros. generalize dependent x0.
+generalize dependent s.
+induction H; intros; simpl.
+- remember (beq_id x1 x0) as b10; destruct b10.
+  + symmetry in Heqb10. apply beq_id_true_iff in Heqb10.
+  subst.
+   assert (tapp (tabs x0 T t12) ([x0 := s] v2) ==>
+  [x0 := [x0 := s] v2] ( t12)).
+  { apply ST_AppAbs. apply value_subst; auto. }
+  assert ([x0 := [x0 := s] v2] t12 =
+    [x0 := s] ([x0 := v2] t12)) by (apply subst_order).
+  rewrite <- H1. auto.
+  
+  + assert (tapp (tabs x0 T ([x1 := s] t12)) ([x1 := s] v2) ==>
+      [x0 := [x1 := s] v2] ([x1 := s] t12)).
+    { apply ST_AppAbs. apply value_subst. assumption. }
+*)
+
+(* induction on term: stand still
 intro t; induction t; intros; subst.
 - inversion H.
 - inversion H; subst.
@@ -1619,12 +1650,12 @@ intro t; induction t; intros; subst.
     { apply ST_AppAbs. apply value_subst. assumption. }
     
     simpl.
-    
-      
+*)
+
 Require Import Omega.
 
 (*YES, I THINK THIS IS CORRECT, FIGHT ME!*)
-Theorem subst_complex : forall (x : id) s t nt ns,
+(*Theorem subst_complex : forall (x : id) s t nt ns,
   complex t nt -> complex s ns ->
   complex ([x := s] t)
     (nt + (appears_count x t)*ns).
@@ -1651,23 +1682,85 @@ remember (n2 + appears_count x t2 * ns) as n2'.
 assert (complex (tapp ([x := s] t1) ([x := s] t2))
   (n1' + (appears_count x ([x := s] t1)) * n2' + 1)).
 { eapply C_App; try assumption. }
+*)
+
+(*
+Theorem complex_value : forall v,
+  value v -> complex v 0.
+Proof.
+intros. destruct H.
+- apply C_Abs. - apply C_Nat.
+Qed.
+*)
+(*
+Theorem subst_value : forall v t x n,
+  value v -> complex t n ->
+  complex ([x := v] t) n.
+Proof.
+intros. generalize dependent n.
+assert (complex v 0) by (apply complex_value; assumption).
+induction t; intros; simpl.
+- intros. inversion H1; subst.
+simpl. destruct (beq_id x0 i).
+apply complex_value. assumption. assumption.
+- inversion H1; subst. 
+assert (complex (tapp ([x0 := v] t1) ([x0 := v] t2))
+  (n1 + afi_count x1 ([x0 := v] t1) * n2 + 1)).
+{ eapply C_App. }
+*)
 
 
 
 (*This is what I want to prove the most*)
-Theorem step_reduce_complex :
+(*Theorem step_reduce_complex :
   forall t t' n, t ==> t' ->
   complex t n -> complex t' (n - 1).
 Proof. intros t; induction t; subst; intros.
 - inversion H.
 - inversion H0; subst. inversion H; subst.
-  + 
+  + clear IHt1. inversion H3; subst.
+  simpl. assert (true = beq_id x0 x0)
+    by (apply beq_id_refl).
+  rewrite <- H1. simpl. assert (n1 + 0 + 1 - 1 = n1) by omega.
+  rewrite H2. simpl.
+*)
 
 
 
 
 
 
+
+Inductive complex : tm -> nat -> Prop :=
+  | Comp_ST: forall t t' n,
+    t ==> t' -> complex t' n -> complex t (n + 1)
+  | Comp_Val : forall t,
+    value t -> complex t 0.
+
+Theorem complex_0 : forall t,
+  complex t 0 -> value t.
+Proof.
+intros. inversion H. assert (forall n, n + 1 <> 0).
+{ intros; omega. }
+apply H4 in H0. inversion H0. assumption. Qed.
+
+(*
+Theorem complex_decidable : forall t T,
+  empty |- t \in T ->
+  exists n, complex t n.
+Proof.
+intros t. induction t; intros.
+- inversion H. inversion H2.
+- inversion H; subst.
+*)
+
+
+
+Theorem hatl : forall t T,
+  empty |- t \in T ->
+  exists t', value t' /\ t ==>* t'.
+Proof.
+intros.
 
 
 

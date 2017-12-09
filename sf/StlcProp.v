@@ -1457,23 +1457,48 @@ intros. induction H.
 Qed.
 
 
-(*Marked! We're working here!*)
-Lemma mult_multi_step : forall t1 t1' t2 t2',
-  t ==>* t' -> tsucc t ==>* tsucc t'.
+Lemma mult_multi_step_1 : forall t1 t1' t2,
+  t1 ==>* t1' -> tmult t1 t2 ==>* tmult t1' t2.
 Proof.
 intros. induction H.
 - auto.
-- eapply multi_step. eauto. eauto.
+- assert (tmult x0 t2 ==> tmult y0 t2) by auto.
+eapply multi_step; eauto.
 Qed.
-Lemma canonical_forms_serious : forall t T1 T2,
-  empty |- t \in (TArrow T1 T2) ->
-  exists t' x u, t' = tabs x T1 u /\ t ==>* t'.
-Proof. intros t. induction t; intros.
-- (*tvar*) inversion H. subst. inversion H2.
-- (*tapp*) inversion H; subst. apply IHt1 in H3.
-destruct H3. destruct H0. destruct H0. destruct H0.
-rename x0 into abs. rename x2 into t'.
-Abort. (*t2 must be a value...*)
+
+Lemma mult_multi_step_2 : forall t1 t2 t2',
+  value t1 -> t2 ==>* t2' ->
+  tmult t1 t2 ==>* tmult t1 t2'.
+Proof.
+intros. induction H0.
+- auto.
+- assert (tmult t1 x0 ==> tmult t1 y0) by auto.
+eapply multi_step; eauto.
+Qed.
+
+Lemma mult_multi_step : forall t1 t1' t2 t2',
+  t1 ==>* t1' -> t2 ==>* t2' -> value t1' ->
+  tmult t1 t2 ==>* tmult t1' t2'.
+Proof.
+intros t1 t1' t2 t2' H. generalize dependent t2.
+generalize dependent t2'. induction H; intros.
+- apply mult_multi_step_2; assumption.
+- assert (tmult x0 t2 ==> tmult y0 t2) by auto.
+eapply multi_step. eassumption.
+apply IHmulti; assumption.
+Qed.
+
+Lemma if0_multi_step : forall t1 t2 t3 t1',
+  t1 ==>* t1' ->
+  tif0 t1 t2 t3 ==>* tif0 t1' t2 t3.
+Proof.
+intros. generalize dependent t2.
+generalize dependent t3. induction H; intros.
+- auto.
+- assert (tif0 x0 t2 t3 ==> tif0 y0 t2 t3).
+{ apply ST_If0. assumption. }
+eauto.
+Qed.
 
 Lemma value_subst: forall x s t,
   value t -> value ([x := s] t).
@@ -1588,7 +1613,7 @@ Inductive bval : tm -> nat -> Prop :=
     bval (tabs i T t) n
 
   | B_Nat: forall m,
-    bval (tvar m) 0
+    bval (tnat m) 0
   | B_Succ: forall t n,
     bval t n ->
     bval (tsucc t) n
@@ -1625,14 +1650,114 @@ inversion H0; subst. assert (exists n, t' = tnat n).
 { eapply preservation_multi; eauto. }
 apply canonical_forms_nat; assumption. }
 
-destruct H3. rename x0 into m.
-exists (tsucc (tnat m)). split.
-  + induction H1. subst. apply multi_refl.
-  assert (tsucc y0 ==>* tsucc (tnat m)).
-  { eapply IHmulti; eauto.
+destruct H3. rename x0 into m. subst.
+exists (tnat (S m)). split.
+  + eapply multi_trans. eapply succ_multi_step.
+  apply H1. eauto.
+  + apply v_nat.
+
+- inversion H; subst. eapply IHt in H2.
+
+Focus 2. inversion H0. eauto.
+
+destruct H2. destruct H1. rename x0 into t'.
+inversion H0; subst. assert (exists n, t' = tnat n).
+{ assert (empty |- t' \in TNat).
+{ eapply preservation_multi; eauto. }
+apply canonical_forms_nat; assumption. }
+
+destruct H3. rename x0 into m. subst.
+exists (tnat (pred m)). split.
+  + eapply multi_trans. eapply pred_multi_step.
+  apply H1. eauto.
+  + apply v_nat.
+
+- inversion H; subst. inversion H0; subst.
+Import Omega.
+assert (n1 = 0) by omega; assert (n2 = 0) by omega.
+subst. clear H3.
+assert (exists t' : tm, t1 ==>* t' /\ value t'); eauto.
+assert (exists t' : tm, t2 ==>* t' /\ value t'); eauto.
+clear IHt1; clear IHt2.
+destruct H1. destruct H2. destruct H1; destruct H2.
+rename x0 into t1'; rename x1 into t2'.
+assert (empty |- t1' \in TNat).
+{ eapply preservation_multi. apply H7. assumption. }
+assert (empty |- t2' \in TNat).
+{ eapply preservation_multi. apply H9. assumption. }
+
+assert (exists n1, t1' = tnat n1).
+{ apply canonical_forms_nat; auto. }
+assert (exists n2, t2' = tnat n2).
+{ apply canonical_forms_nat; auto. }
+destruct H11; destruct H12; subst.
+rename x0 into n1; rename x1 into n2.
+
+exists (tnat (n1 * n2)).
+assert (tmult t1 t2 ==>* tmult (tnat n1) (tnat n2)).
+{ apply mult_multi_step; auto. }
+
+split. Focus 2. auto.
+
+eapply multi_trans.
+  + apply H11. + apply multi_R. apply ST_Mult.
+
+(*Final boss!*)
+- inversion H; subst.
+  + assert (n1 = 0) by omega. assert (n2 = 0) by omega.
+  subst. clear H4. inversion H0; subst.
+  assert (exists t' : tm, t1 ==>* t' /\ value t').
+  { eapply IHt1; eauto. }
+  assert (exists t' : tm, t2 ==>* t' /\ value t').
+  { eapply IHt2; eauto. }
   
+  clear IHt1; clear IHt2; clear IHt3.
+  destruct H1; destruct H2. destruct H1; destruct H2.
+  rename x0 into t1'; rename x1 into t2'.
 
+  exists t2'. split. Focus 2. auto.
+  eapply multi_trans. apply H5. apply H2.
 
+  + assert (n1 = 0) by omega. assert (n3 = 0) by omega.
+  subst. clear H4. inversion H0; subst.
+  assert (exists t' : tm, t1 ==>* t' /\ value t').
+  { eapply IHt1; eauto. }
+  assert (exists t' : tm, t3 ==>* t' /\ value t').
+  { eapply IHt3; eauto. }
+  
+  clear IHt1; clear IHt2; clear IHt3.
+  destruct H1; destruct H2. destruct H1; destruct H2.
+  rename x0 into t1'; rename x1 into t3'.
+
+  exists t3'. split. Focus 2. auto.
+  eapply multi_trans. apply H5. apply H2.
+Qed.
+
+Theorem bval_reduce: forall t n,
+  bval t n -> exists t',
+    t ==>* t' /\ (bval t' 0 \/
+    exists i T u, t' = tabs i T u).
+Proof.
+intro t; induction t; intros.
+- inversion H; subst. exists (tvar i). auto.
+- 
+
+Theorem bval_decidable : forall t,
+  exists n, bval t n.
+Proof. intro t. induction t; intros.
+- exists 0. apply B_Var.
+- destruct IHt1; destruct IHt2.
+exists (1 + x0 + x1). apply B_App; auto.
+- destruct IHt. exists x0. apply B_Abs; auto.
+
+- exists 0; apply B_Nat.
+- destruct IHt. exists x0; apply B_Succ. auto.
+- destruct IHt. exists x0; apply B_Pred. auto.
+- destruct IHt1; destruct IHt2.
+exists (x0 + x1); apply B_Mult; auto.
+- (*I'm stuck here! Can anybody help? Oh my God is
+this really undecidable?*)
+(*Marked!*)
 
 Theorem halt : forall t T,
   empty |- t \in T ->

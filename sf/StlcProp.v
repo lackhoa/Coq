@@ -1598,7 +1598,25 @@ Proof. induction t; intros.
   reflexivity.
 Qed.
 
+Theorem tarrow_absurd: forall T1 T2,
+  T1 <> TArrow T1 T2.
+Proof.
+induction T1; intros.
+- intro. inversion H; subst.
+apply IHT1_1 in H1. assumption.
+- intro. inversion H.
+Qed.
 
+(*This theorem shows that you can't have
+self-application, ever in any context*)
+Theorem self_app_type: forall t T G,
+  ~ (G |- (tapp t t) \in T).
+Proof.
+intros. intro. inversion H; subst.
+assert (T11 = TArrow T11 T) by
+  (eapply types_unique; eauto).
+apply tarrow_absurd in H0. assumption.
+Qed.
 
 (** [] *)
 

@@ -1,9 +1,10 @@
 (** * StlcProp: Properties of STLC *)
-
+Add LoadPath "/home/khoa/Coq/sf".
 Require Import Maps.
 Require Import Types.
-Require Import Stlc.
 Require Import Smallstep.
+Require Import Stlc.
+
 Module STLCProp.
 Import STLC.
 Require Import Omega.

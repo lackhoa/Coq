@@ -10,6 +10,49 @@ Import STLC.
 Import STLCProp.
 Require Import Omega.
 
+Lemma value_typable_empty: forall t,
+  value t -> exists T, empty |- t \in T.
+  Proof.
+  induction t; intros.
+  - inversion H. - inversion H.
+  - Abort.
+
+Lemma app_multi_step_1 : forall t1 t2 t1',
+  t1 ==>* t1' ->
+  tapp t1 t2 ==>* tapp t1' t2.
+Proof. intros. generalize dependent t2. induction H.
+- eauto.
+- rename x0 into x; rename y0 into y; rename z0 into z.
+intros. assert (tapp x t2 ==> tapp y t2).
+{ apply ST_App1. assumption. }
+
+eapply multi_step; eauto.
+Qed.
+
+Lemma app_multi_step_2 : forall v1 t2 t2',
+  t2 ==>* t2' -> value v1 ->
+  tapp v1 t2 ==>* tapp v1 t2'.
+Proof. intros. generalize dependent v1. induction H.
+- eauto.
+- rename x0 into x; rename y0 into y; rename z0 into z.
+intros. assert (tapp v1 x ==> tapp v1 y).
+{ apply ST_App2; assumption. }
+
+eapply multi_step; eauto.
+Qed.
+
+Theorem app_multi_step : forall t1 t1' t2 t2',
+  t1 ==>* t1' -> value t1' -> t2 ==>* t2'->
+  tapp t1 t2 ==>* tapp t1' t2'.
+Proof.
+intros. induction H.
+- apply app_multi_step_2; assumption.
+- apply IHmulti in H0. clear IHmulti.
+assert (tapp x0 t2 ==> tapp y0 t2).
+{ apply ST_App1; assumption. }
+eapply multi_step; eauto.
+Qed.
+
 Definition tm_context := partial_map tm.
 
 Definition wtyped_empty (t: tm): Prop :=
@@ -173,6 +216,20 @@ auto.
 Qed.
 (*adapt is correct!*)
 
+Definition atom (t: tm): Prop :=
+  t = ttrue \/ t = tfalse.
+
+
+
+
+Definition value_core (t: tm): Prop :=
+  atom t \/
+  (exists i T1 u, t = tabs i T1 u /\
+  (forall s, value s -> empty |- s \in T1 ->
+    normalizing value ([i:=s] u))).
+
+
+
 
 
 
@@ -190,23 +247,120 @@ Definition adapt_fit_context (Sigma: tm_context) (Gamma: context): Prop :=
 (*all the adapt terms must be well_typed in the empty context, and the type must be specified in the type context*)
 (*the adapt context contains precisely those variables specified in the type context, and nothing else*)
 
-Definition atom (t: tm): Prop :=
-  t = ttrue \/ t = tfalse.
+Lemma adapt_fit_context_closed: forall Gamma Sigma,
+  adapt_fit_context Sigma Gamma -> tm_context_closed Sigma.
+  Proof.
+  intros. unfold tm_context_closed. intros.
+  inversion H. apply H1 in H0.
+  destruct H0. destruct H3. destruct H3.
+  eapply typable_empty__closed. eauto.
+  Qed.
 
-Theorem halt: forall t Gamma T Sigma,
+Lemma adapt_fit_context_lost: forall Gamma Sigma i,
+  adapt_fit_context Sigma Gamma ->
+  adapt_fit_context (t_update Sigma i None) (t_update Gamma i None).
+  Proof.
+  intros. inversion H. unfold adapt_fit_context.
+  clear H. split.
+  - intros. unfold t_update in *.
+  destruct (beq_id i i0).
+    + inversion H. + apply H0; auto.
+  - intros. unfold t_update in *.
+  destruct (beq_id i i0).
+    + inversion H. + apply H1; auto.
+  Qed.
+
+Lemma adapt_fit_context_gain: forall Gamma Sigma i t T,
+  adapt_fit_context Sigma Gamma ->
+  empty |- t \in T -> value t ->
+  adapt_fit_context (t_update Sigma i (Some t)) (t_update Gamma i (Some T)).
+  Proof.
+  intros. inversion H. unfold adapt_fit_context.
+  split; intros.
+  - unfold t_update in *. destruct (beq_id i i0).
+    + inversion H4; subst. split; auto. eauto.
+    + apply H2; auto.
+  - unfold t_update in *. destruct (beq_id i i0).
+    + inversion H4; subst. eauto.
+    + apply H3; auto.
+  Qed.
+  
+Theorem adapt_pres_typing: forall Gamma Sigma t T,
   Gamma |- t \in T ->
   adapt_fit_context Sigma Gamma ->
-  (normalizing atom (adapt Sigma t)) \/
-  (exists i T1 u, t ==>* tabs i T1 u /\
-    forall s, empty |- s \in T1 -> value s ->
-    normalizing atom (adapt (t_update Sigma i (Some s)) u)).
-Proof.
-induction t; intros.
-- left. inversion H0. simpl.
-remember (Sigma i) as si eqn:Hsi.
-symmetry in Hsi. destruct si.
-  + apply H1 in Hsi. destruct Hsi. unfold normalizing.
-  exists t. split; auto. destruct H3.
+  empty |- (adapt Sigma t) \in T.
+  Proof.
+  induction Sigma; intros.
+  - 
+  
+  
+  intros Gamma Sigma t. generalize dependent Gamma.
+  generalize dependent Sigma. induction t; intros.
+  - inversion H; subst. simpl.
+  inversion H0. apply H2 in H3. destruct H3.
+  destruct H3. rewrite H3. destruct H4; auto.
+  - simpl. inversion H; subst. eapply T_App.
+  eapply IHt1; eauto. eapply IHt2; eauto.
+  - simpl. inversion H; subst. eapply T_Abs.
+  rename t into T. 
+
+(*==================Prime=====================*)
+(*This is my effort to break the abstraction wall, as you can see, it failed!*)
+Inductive Prime: tm -> Prop :=
+  | PVar: forall x, Prime (tvar x)
+  | PAbs: forall i T u, Prime (tabs i T u)
+  | PApp: forall t1 t2 i T1, Prime t1 -> Prime t2 ->
+    Prime (tapp (tabs i T1 t1) t2)
+
+  | PTrue: Prime ttrue
+  | PFalse: Prime tfalse
+  | PIf: forall t1 t2 t3, Prime (tif t1 t2 t3).
+
+Theorem hatl_prime: forall t Gamma T Sigma,
+  Prime t -> Gamma |- t \in T ->
+  adapt_fit_context Sigma Gamma ->
+  normalizing value (adapt Sigma t).
+  Proof.
+  intros. generalize dependent Gamma;
+  generalize dependent Sigma;
+  generalize dependent T.
+   induction H; intros.
+  - inversion H1. inversion H0; subst.
+  apply H2 in H5. simpl. destruct H5.
+  destruct H3. rewrite H3. destruct H4.
+  unfold normalizing. eauto.
+
+  - simpl. unfold normalizing.
+  exists (tabs i T (adapt (t_update Sigma i None) u));
+  eauto.
+
+  - simpl. inversion H1; subst. inversion H2.
+  assert (normalizing value (adapt Sigma t2)).
+  { eapply IHPrime2; eauto. }
+  destruct H5. destruct H5.
+  assert (tapp (tabs i T1 (adapt (t_update Sigma i None) t1)) (adapt Sigma t2) ==>* tapp (tabs i T1 (adapt (t_update Sigma i None) t1)) x0).
+  { apply app_multi_step_2; auto. }
+  
+  clear IHPrime2.
+  
+  assert (tapp (tabs i T1 (adapt (t_update Sigma i None) t1)) x0 ==> [i := x0]adapt (t_update Sigma i None) t1).
+  { apply ST_AppAbs; auto. }
+  
+  assert (normalizing value ([i := x0] adapt (t_update Sigma i None) t1)).
+  { assert ([i := x0] adapt (t_update Sigma i None) t1 = adapt (t_update (t_update Sigma i None) i (Some x0)) t1). { apply adapt_correct; auto. apply t_update_eq.
+  apply adapt_fit_context_closed with (t_update Gamma i None). apply adapt_fit_context_lost. auto. }
+  rewrite H11. eapply IHPrime1. inversion H6; subst.
+  eauto. rewrite t_update_shadow. apply adapt_fit_context_gain; auto. inversion H6; subst.
+   }
+
+
+
+
+
+
+
+
+
 
 
 

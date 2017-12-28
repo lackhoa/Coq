@@ -52,8 +52,49 @@ apply (even_list_mut
 - simpl. rewrite H. auto.
 Qed. (*Awesome!*)
 
+(*==================Reflexive type==============*)
+Inductive pformula : Set :=
+  | Truth : pformula
+  | Falsehood : pformula
+  | Conjunction : pformula -> pformula -> pformula.
 
+Fixpoint pformulaDenote (f : pformula) : Prop :=
+  match f with
+    | Truth => True
+    | Falsehood => False
+    | Conjunction f1 f2 => pformulaDenote f1 /\ pformulaDenote f2
+end.
 
+Inductive formula : Set :=
+| Eq : nat -> nat -> formula
+| And : formula -> formula -> formula
+| Forall : (nat -> formula) -> formula.
+
+Fixpoint formulaDenote (f : formula) : Prop :=
+  match f with
+    | Eq n1 n2 => n1 = n2
+    | And f1 f2 => formulaDenote f1 /\ formulaDenote f2
+    | Forall f' => forall n : nat, formulaDenote (f' n)
+  end.
+
+Fixpoint swapper (f : formula) : formula :=
+  match f with
+    | Eq n1 n2 => Eq n2 n1
+    | And f1 f2 => And (swapper f2) (swapper f1)
+    | Forall f' => Forall (fun n => swapper (f' n))
+  end.
+
+Theorem swapper_preserves_truth : forall f, formulaDenote f -> formulaDenote (swapper f).
+Proof.
+induction f; intros.
+- simpl. inversion H. auto.
+- simpl. inversion H. apply IHf1 in H0;
+apply IHf2 in H1. auto.
+
+- (*The big case*)
+simpl. simpl in H0. intro.
+eapply H in H0. apply H0.
+Qed.
 
 
 

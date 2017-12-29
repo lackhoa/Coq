@@ -10,12 +10,23 @@ Import STLC.
 Import STLCProp.
 Require Import Omega.
 
-Lemma value_typable_empty: forall t,
-  value t -> exists T, empty |- t \in T.
-  Proof.
-  induction t; intros.
-  - inversion H. - inversion H.
-  - Abort.
+(*=======Terminologies and Trivials===========*)
+Definition wtyped_empty (t: tm): Prop :=
+  exists T, empty |- t \in T.
+
+Definition t_val_no_type (i: id) := tabs i (TBool) (tapp (tvar i) (ttrue)).
+Lemma value_no_type: forall i,
+  value (t_val_no_type i) /\ ~ wtyped_empty (t_val_no_type i).
+Proof.
+unfold t_val_no_type. split.
+- apply v_abs.
+- intro. inversion H. inversion H0; subst.
+inversion H6; subst. inversion H4; subst.
+unfold update in H3. unfold t_update in H3.
+rewrite <- beq_id_refl in H3. inversion H3; subst.
+Qed.
+(*There you go! I've proven the existence of a value that is a value but not well_typed*)
+
 
 Lemma app_multi_step_1 : forall t1 t2 t1',
   t1 ==>* t1' ->
@@ -55,11 +66,17 @@ Qed.
 
 Definition tm_context := partial_map tm.
 
-Definition wtyped_empty (t: tm): Prop :=
-  exists T, empty |- t \in T.
-
 Definition normalizing (P: tm -> Prop) (t: tm): Prop :=
   exists t', t ==>* t' /\ P t'.
+
+
+
+
+
+
+
+
+(*=================Real Work!=================*)
 
 Fixpoint adapt (Sigma: tm_context) (t: tm): tm :=
   match t with
